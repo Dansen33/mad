@@ -1,0 +1,133 @@
+import Link from "next/link";
+
+export function SiteFooter() {
+  return (
+    <footer className="mt-12 border-t border-border bg-gradient-to-b from-white via-white pt-10 to-muted/30 text-foreground">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-5 shadow-sm backdrop-blur">
+          <div className="flex items-start gap-3">
+            <Link href={"/"}>
+            <img className="-ml-6 -mr-10 h-20 w-60" src="/logo.png" alt="WELLCOMP" />
+            </Link>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-primary">WELLCOMP</div>
+              <div className="text-xl font-extrabold">Segítünk választani</div>
+              <p className="text-sm text-muted-foreground">
+                Business support, gyors szállítás, 12 hó garancia.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="tel:+36301234567"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold shadow-sm hover:border-primary/60"
+            >
+              📞 +36 70 317 6680
+            </a>
+            <a
+              href="mailto:info@wellcomp.hu"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-primary/30 shadow-lg"
+            >
+              ✉️ info@wellcomp.hu
+            </a>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Termékkategóriák
+            </h3>
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <Link className="hover:text-foreground" href="/laptopok/osszes">
+                Laptopok
+              </Link>
+              <Link className="hover:text-foreground" href="/pc-k/osszes">
+                PC-k
+              </Link>
+              <Link className="hover:text-foreground" href="/pc-k/kategoria/gamer-pc-300-600">
+                Gamer PC-k
+              </Link>
+              <Link className="hover:text-foreground" href="/pc-k/kategoria/professzionalis-munkaallomas">
+                Munkaállomások
+              </Link>
+              <Link className="hover:text-foreground" href="/telefonok/osszes">
+                Telefonok
+              </Link>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Fontos információk
+            </h3>
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <Link className="hover:text-foreground" href="/fizetes-szallitas">
+                Fizetés és szállítás
+              </Link>
+              <Link className="hover:text-foreground" href="/garancia">
+                Garancia
+              </Link>
+              <Link className="hover:text-foreground" href="/aszf">
+                ÁSZF
+              </Link>
+              <Link className="hover:text-foreground" href="/adatvedelem">
+                Adatkezelési tájékoztató
+              </Link>
+              <Link className="hover:text-foreground" href="/impresszum">
+                Impresszum
+              </Link>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Hasznos linkek
+            </h3>
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <Link className="hover:text-foreground" href="/miert-mi">
+                Miért vásároljon nálunk
+              </Link>
+              <Link className="hover:text-foreground" href="/blog">
+                Blog
+              </Link>
+              <Link className="hover:text-foreground" href="/kapcsolat">
+                Kapcsolat
+              </Link>
+              <Link className="hover:text-foreground" href="/gyik">
+                GYIK
+              </Link>
+              <Link className="hover:text-foreground" href="/rolunk">
+                Rólunk
+              </Link>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Elérhetőségek
+            </h3>
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <a className="hover:text-foreground" href="tel:+36301234567">
+                +36 70 317 6680
+              </a>
+              <a className="hover:text-foreground" href="mailto:info@wellcomp.hu">
+                info@wellcomp.hu
+              </a>
+              <p className="text-foreground">H-P: 9:00 - 18:00</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} WELLCOMP. Minden jog fenntartva.</span>
+          <div className="flex gap-3">
+            <Link className="hover:text-foreground" href="/adatvedelem">
+              Adatvédelem
+            </Link>
+            <Link className="hover:text-foreground" href="/aszf">
+              ÁSZF
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

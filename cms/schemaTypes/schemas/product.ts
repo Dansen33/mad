@@ -1,0 +1,178 @@
+import { defineField, defineType } from "sanity";
+
+const categories = [
+  { title: "Általános", value: "GENERAL" },
+  { title: "Üzleti", value: "BUSINESS" },
+  { title: "Gamer", value: "GAMING" },
+  { title: "Workstation", value: "WORKSTATION" },
+  { title: "Érintőképernyős", value: "TOUCH" },
+];
+
+export default defineType({
+  name: "product",
+  title: "Termékek",
+  type: "document",
+  fields: [
+    defineField({
+      name: "name",
+      title: "Név",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      options: { source: "name", maxLength: 96 },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "shortDescription",
+      title: "Rövid leírás",
+      type: "text",
+      rows: 2,
+    }),
+    defineField({
+      name: "description",
+      title: "Leírás (rich text)",
+      type: "array",
+      of: [{ type: "block" }],
+    }),
+    defineField({
+      name: "priceHuf",
+      title: "Ár (HUF)",
+      type: "number",
+      validation: (rule) => rule.required().integer().positive(),
+    }),
+    defineField({
+      name: "categories",
+      title: "Kategóriák",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: categories },
+      description: "Több kategória is választható (pl. gamer + érintőképernyős).",
+    }),
+    defineField({
+      name: "brand",
+      title: "Márka",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "condition",
+      title: "Állapot",
+      type: "string",
+      options: {
+        list: [
+          { title: "Új", value: "UJ" },
+          { title: "Felújított", value: "FELUJITOTT" },
+        ],
+      },
+      description: "Válaszd ki, hogy a termék új vagy felújított.",
+    }),
+    defineField({
+      name: "stock",
+      title: "Készlet",
+      type: "number",
+      validation: (rule) => rule.min(0).integer(),
+    }),
+    defineField({
+      name: "memoryUpgradeGroup",
+      title: "Memória bővítés típusa",
+      type: "string",
+      options: {
+        list: [
+          { title: "DDR4", value: "ddr4" },
+          { title: "DDR5", value: "ddr5" },
+        ],
+        layout: "radio",
+      },
+      description: "Ha engedélyezett a memória bővítés, melyik árlistát használja (DDR4/DDR5).",
+    }),
+    defineField({
+      name: "allowMemoryUpgrades",
+      title: "Memória bővíthető",
+      type: "boolean",
+      initialValue: false,
+      description: "Ha be van kapcsolva, a frontenden megjelennek a memória bővítő opciók az árlistából.",
+    }),
+    defineField({
+      name: "allowSsdUpgrades",
+      title: "SSD bővíthető",
+      type: "boolean",
+      initialValue: false,
+      description: "Ha be van kapcsolva, a frontenden megjelennek az SSD bővítési opciók az árlistából.",
+    }),
+    defineField({
+      name: "featured",
+      title: "Kiemelt termék?",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "tags",
+      title: "Címkék",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "specs",
+      title: "Specifikációk",
+      type: "object",
+      fields: [
+        { name: "processor", title: "Processzor", type: "string" },
+        { name: "memory", title: "Memória", type: "string" },
+        { name: "gpu", title: "Grafikus vezérlő (GPU)", type: "string" },
+        { name: "display", title: "Kijelző", type: "string" },
+        { name: "refreshRate", title: "Képfrissítés (Hz)", type: "number" },
+        { name: "storage", title: "Háttértár", type: "string" },
+        { name: "os", title: "Operációs rendszer", type: "string" },
+        { name: "lan", title: "LAN Típus", type: "string" },
+        { name: "wifi", title: "Wi-Fi", type: "string" },
+        { name: "bluetooth", title: "Bluetooth", type: "string" },
+        { name: "hdmi", title: "HDMI", type: "string" },
+        { name: "usb2", title: "USB 2.0", type: "string" },
+        { name: "usb3", title: "USB 3.0", type: "string" },
+        { name: "usb31", title: "USB 3.1", type: "string" },
+        { name: "typec", title: "Type C", type: "string" },
+        { name: "optical", title: "Optikai meghajtó", type: "string" },
+        { name: "keyboard", title: "Billentyűzet", type: "string" },
+        { name: "audio", title: "Audio", type: "string" },
+        { name: "webcam", title: "Webkamera", type: "string" },
+        { name: "battery", title: "Akkumulátor", type: "string" },
+        { name: "extras", title: "Extrák", type: "text" },
+        { name: "moreExtras", title: "További extrák", type: "text" },
+        { name: "size", title: "Méret", type: "string" },
+        { name: "weight", title: "Súly", type: "string" },
+        { name: "warranty", title: "Garancia", type: "string" },
+      ],
+    }),
+    defineField({
+      name: "images",
+      title: "Képek",
+      type: "array",
+      of: [
+        defineField({
+          type: "image",
+          name: "image",
+          options: { hotspot: true },
+          fields: [{ name: "alt", title: "Alt", type: "string" }],
+        }),
+      ],
+      validation: (rule) => rule.min(1),
+    }),
+    defineField({
+      name: "createdAt",
+      title: "Létrehozva",
+      type: "datetime",
+      initialValue: () => new Date().toISOString(),
+    }),
+  ],
+  preview: {
+    select: {
+      title: "name",
+      subtitle: "brand",
+      media: "images.0",
+    },
+  },
+});
