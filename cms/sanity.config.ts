@@ -10,9 +10,26 @@ export default defineConfig({
   projectId: 'uomw3xpf',
   dataset: 'production',
 
-  plugins: [structureTool(), visionTool()],
-
-  schema: {
-    types: schemaTypes,
+   studio: {
+    basePath: '/',
+    outputPath: 'dist', // hagyd így, ne legyen a gyökér/../
   },
+
+vite: {
+  server: {
+    host: "0.0.0.0",
+    port: 3333,
+    allowedHosts: ["wellcomp.hu", "www.wellcomp.hu", "localhost", "127.0.0.1"],
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 3333,
+    strictPort: true,
+    allowedHosts: ["wellcomp.hu", "www.wellcomp.hu", "localhost", "127.0.0.1"],
+  },
+},
+
+  schema: { types: schemaTypes },
+  plugins: [structureTool(), visionTool()],
+},
 })

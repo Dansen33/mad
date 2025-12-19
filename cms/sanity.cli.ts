@@ -1,15 +1,24 @@
+// sanity.cli.ts
 import {defineCliConfig} from 'sanity/cli'
 
 export default defineCliConfig({
-  api: {
+  project: { basePath: '/studio' },
+ api: {
     projectId: 'uomw3xpf',
-    dataset: 'production'
+    dataset: 'production',
   },
-  deployment: {
-    /**
-     * Enable auto-updates for studios.
-     * Learn more at https://www.sanity.io/docs/cli#auto-updates
-     */
-    autoUpdates: true,
-  }
+  vite: {
+    server: {
+      host: '0.0.0.0',
+      port: 3333,
+      strictPort: true,
+      allowedHosts: ['wellcomp.hu', '.wellcomp.hu'],
+    },
+    preview: {
+      host: '0.0.0.0',
+      port: 3333,
+      strictPort: true,
+      allowedHosts: ['wellcomp.hu', '.wellcomp.hu'],
+    },
+  },
 })
