@@ -3,7 +3,6 @@ import Link from "next/link";
 import { sanityClient } from "@/lib/sanity";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
-import { AddToCartButton } from "@/components/add-to-cart-button";
 import { PriceSlider } from "@/components/price-slider";
 import { SortSelect } from "@/components/sort-select";
 
@@ -47,6 +46,7 @@ type PcHit = {
 
 type FacetRow = {
   brand?: string;
+  condition?: string;
   category?: string;
   specs?: {
     processor?: string;
@@ -68,7 +68,6 @@ type FilterFormProps = {
   ssd?: string;
   priceMin?: number;
   priceMax?: number;
-  floorPrice: number;
   ceilPrice: number;
   brands: string[];
   conditionOptions: { value: string; label: string }[];
@@ -77,15 +76,14 @@ type FilterFormProps = {
   memories: string[];
   gpus: string[];
   ssds: string[];
-  clearHref: string;
 };
 
 const categoryLabelMap: Record<string, string> = {
-  "gamer-pc-olcso-300-alatt": "Belépő kategóriás Gamer PC-k 300.000 Ft-ig",
-  "gamer-pc-300-600": "Középkategóriás Gamer PC-k 300.000-600.000 Ft-ig",
-  "gamer-pc-600-felett": "Felsőkategóriás Gamer PC-k 600.000 Ft-tól",
+  "gamer-pc-olcso-300-alatt": "Belépő kategóriás Gamer PC 300.000 Ft-ig",
+  "gamer-pc-300-600": "Középkategóriás Gamer PC 300.000-600.000 Ft-ig",
+  "gamer-pc-600-felett": "Felsőkategóriás Gamer PC 600.000 Ft-tól",
   "professzionalis-munkaallomas": "Professzionális Munkaállomások",
-  "felujitott-gamer-pc": "Felújított Gamer PC-k",
+  "felujitott-gamer-pc": "Felújított Gamer PC",
 };
 
 function FilterForm({
@@ -100,7 +98,6 @@ function FilterForm({
   ssd,
   priceMin,
   priceMax,
-  floorPrice,
   ceilPrice,
   brands,
   conditionOptions,
@@ -109,7 +106,6 @@ function FilterForm({
   memories,
   gpus,
   ssds,
-  clearHref,
 }: FilterFormProps) {
   return (
     <form className="space-y-4" method="get">
@@ -448,7 +444,6 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
   const priceValues = pcsWithEffective
     .map((x) => x.effectivePrice)
     .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-  const floorPrice = priceValues.length ? Math.min(...priceValues) : 0;
   const ceilPrice = priceValues.length ? Math.max(...priceValues) : 1000000;
 
   const filterKey = [
@@ -476,7 +471,6 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
     ssd,
     priceMin,
     priceMax,
-    floorPrice,
     ceilPrice,
     brands,
     conditionOptions,
@@ -485,12 +479,20 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
     memories,
     gpus,
     ssds,
-    clearHref: "/pc-k/osszes",
   };
 
   const categoryTitleMap = categoryLabelMap;
-  const pageTitle = category ? categoryTitleMap[category] || "PC-k" : "Összes PC";
-  const pageSubtitle = category ? "Szűrve kategóriára" : "Gamer és munkaállomás konfigurációk szűrőkkel.";
+  const conditionLabelMap: Record<string, string> = { UJ: "Új", FELUJITOTT: "Felújított" };
+  const conditionLabel = condition ? conditionLabelMap[condition] || condition : null;
+  const baseTitle = category ? categoryTitleMap[category] || "PC" : "Összes PC";
+  let pageTitle = baseTitle;
+  if (brand && category) pageTitle = `${brand} ${baseTitle.toLowerCase()}`;
+  else if (brand) pageTitle = `${brand} PC`;
+  if (conditionLabel) pageTitle = `${pageTitle} – ${conditionLabel}`;
+  const pageSubtitle =
+    category || brand || conditionLabel
+      ? "Szűrt találatok a beállított feltételekkel."
+      : "Gamer és munkaállomás konfigurációk szűrőkkel.";
 
   const formatPrice = (value?: number) =>
     typeof value === "number" ? `${new Intl.NumberFormat("hu-HU").format(value)} Ft` : "Árért érdeklődj";
@@ -504,7 +506,7 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
             Főoldal
           </Link>
           <span>/</span>
-          <span className="text-foreground">PC-k</span>
+          <span className="text-foreground">PC</span>
         </div>
 
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
@@ -542,6 +544,20 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
           </aside>
 
           <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {!sortedPcs.length && (
+              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                <p className="mt-1">
+                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                </p>
+                <Link
+                  href="/pc-k/osszes"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                >
+                  Összes PC megtekintése
+                </Link>
+              </div>
+            )}
             {sortedPcs.map((pc, idx) => {
               const firstImage = pc.images?.[0]?.url;
               const specs = pc.specs || {};

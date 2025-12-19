@@ -10,9 +10,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "WELLCOMP | Használt laptop webshop",
+  title: "WELLCOMP | PC, Laptop, telefon webshop webshop",
   description:
-    "Bevizsgált, prémium használt laptopok vállalkozásoknak és magánszemélyeknek. Gyors szállítás, garancia, business support.",
+    "Bevizsgált, prémium PC, Laptop, telefon webshopok vállalkozásoknak és magánszemélyeknek. Gyors szállítás, garancia, business support.",
 };
 
 export default function RootLayout({

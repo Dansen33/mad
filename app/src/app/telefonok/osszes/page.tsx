@@ -23,6 +23,7 @@ type PhoneHit = {
   featured?: boolean;
   _createdAt?: string;
   brand?: string;
+  condition?: string;
   stock?: number;
   shortDescription?: string;
   specs?: {
@@ -54,6 +55,7 @@ type FacetRow = {
 type FilterFormProps = {
   sort: string;
   brand?: string;
+  condition?: string;
   q?: string;
   soc?: string;
   memory?: string;
@@ -62,7 +64,6 @@ type FilterFormProps = {
   os?: string;
   priceMin?: number;
   priceMax?: number;
-  floorPrice: number;
   ceilPrice: number;
   brands: string[];
   socs: string[];
@@ -76,6 +77,7 @@ type FilterFormProps = {
 function FilterForm({
   sort,
   brand,
+  condition,
   q,
   soc,
   memory,
@@ -84,7 +86,6 @@ function FilterForm({
   os,
   priceMin,
   priceMax,
-  floorPrice,
   ceilPrice,
   brands,
   socs,
@@ -97,6 +98,7 @@ function FilterForm({
   return (
     <form className="space-y-4" method="get">
       <input type="hidden" name="sort" value={sort} />
+      <input type="hidden" name="condition" value={condition || ""} />
       <div className="space-y-1">
         <label className="text-xs font-semibold uppercase text-muted-foreground">Keresés</label>
         <input
@@ -229,6 +231,8 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
   const rawSort = typeof params.sort === "string" ? params.sort : "latest";
   const sort = rawSort === "default" ? "latest" : rawSort;
   const brand = typeof params.brand === "string" && params.brand.trim().length > 0 ? params.brand : undefined;
+  const condition =
+    typeof params.condition === "string" && params.condition.trim().length > 0 ? params.condition : undefined;
   const soc = typeof params.soc === "string" && params.soc.trim().length > 0 ? params.soc : undefined;
   const memory = typeof params.memory === "string" && params.memory.trim().length > 0 ? params.memory : undefined;
   const storage = typeof params.storage === "string" && params.storage.trim().length > 0 ? params.storage : undefined;
@@ -245,6 +249,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
   const phones: PhoneHit[] = await sanityClient.fetch(
     `*[_type=="phone" && (!defined(stock) || stock > 0)
       && (!defined($brand) || $brand=="" || lower(brand)==lower($brand))
+      && (!defined($condition) || $condition=="" || condition==$condition)
       && (!defined($soc) || $soc=="" || lower(specs.soc)==lower($soc))
       && (!defined($memory) || $memory=="" || lower(specs.memory)==lower($memory))
       && (!defined($storage) || $storage=="" || lower(specs.storage)==lower($storage))
@@ -289,6 +294,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
       "finalPriceHuf": priceHuf - coalesce(discountHufs[0], 0),
       "invalidDiscount": (priceHuf - coalesce(discountHufs[0], 0)) < 0,
       brand,
+      condition,
       stock,
       shortDescription,
       specs{
@@ -307,6 +313,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
     }|order(${orderBy.map((o) => `${o.field} ${o.direction}`).join(",")})`,
     {
       brand: brand ?? null,
+      condition: condition ?? null,
       soc: soc ?? null,
       memory: memory ?? null,
       storage: storage ?? null,
@@ -405,13 +412,13 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
   const priceValues = withEffectivePrice
     .map((p) => p.effectivePrice)
     .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-  const floorPrice = priceValues.length ? Math.min(...priceValues) : 0;
   const ceilPrice = priceValues.length ? Math.max(...priceValues) : 0;
 
   const filterKey = [
     sort,
     q || "",
     brand || "",
+    condition || "",
     soc || "",
     memory || "",
     storage || "",
@@ -425,6 +432,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
     sort,
     q,
     brand,
+    condition,
     soc,
     memory,
     storage,
@@ -432,7 +440,6 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
     os,
     priceMin,
     priceMax,
-    floorPrice,
     ceilPrice,
     brands,
     socs,
@@ -442,6 +449,17 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
     oss,
     clearHref: "/telefonok/osszes",
   };
+
+  const conditionLabelMap: Record<string, string> = { UJ: "Új", FELUJITOTT: "Felújított" };
+  const conditionLabel = condition ? conditionLabelMap[condition] || condition : null;
+  const hasFilters = Boolean(brand || condition || q || soc || memory || storage || display || os || priceMin || priceMax);
+  const kicker = brand ? brand : conditionLabel ? conditionLabel : "Összes";
+  let pageTitle = brand ? `${brand} telefonok` : "Minden telefon";
+  if (conditionLabel && brand) pageTitle = `${brand} telefonok – ${conditionLabel}`;
+  else if (conditionLabel && !brand) pageTitle = `${conditionLabel} telefonok`;
+  const subtitle = hasFilters
+    ? "Szűrt találatok a megadott feltételekkel."
+    : "Márkák, kategóriák, specifikációk szerint.";
 
   const formatPrice = (value?: number) =>
     typeof value === "number" ? `${new Intl.NumberFormat("hu-HU").format(value)} Ft` : "Árért érdeklődj";
@@ -455,15 +473,17 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
             Főoldal
           </Link>
           <span>/</span>
-          <span className="text-foreground">Összes telefon</span>
+          <span className="text-foreground">
+            {brand ? `${brand} telefonok` : conditionLabel ? `${conditionLabel} telefonok` : "Telefonok"}
+          </span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card px-4 py-3 shadow-lg shadow-black/30">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase text-primary">Telefonok</div>
-              <h1 className="text-2xl font-extrabold">Minden telefon</h1>
-              <p className="text-sm text-muted-foreground">Márkák, kategóriák, specifikációk szerint.</p>
+              <div className="text-xs uppercase text-primary">{kicker}</div>
+              <h1 className="text-2xl font-extrabold">{pageTitle}</h1>
+              <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
             <div className="flex flex-col items-end gap-2 text-xs font-semibold text-muted-foreground sm:flex-row sm:items-center sm:gap-3">
               <SortSelect
@@ -494,6 +514,20 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
           </aside>
 
           <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {!sortedPhones.length && (
+              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                <p className="mt-1">
+                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                </p>
+                <Link
+                  href="/telefonok/osszes"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                >
+                  Összes telefon megtekintése
+                </Link>
+              </div>
+            )}
             {sortedPhones.map((phone) => {
               const firstImage = phone.images?.[0]?.url;
               const specs = phone.specs || {};

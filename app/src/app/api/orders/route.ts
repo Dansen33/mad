@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       image: it.image,
       upgrades: Array.isArray(it.upgrades)
         ? it.upgrades
-            .map((u: any, uidx: number) => ({
+            .map((u: { label?: unknown; deltaHuf?: unknown }, uidx: number) => ({
               label: typeof u?.label === "string" ? u.label : "",
               deltaHuf: Number(u?.deltaHuf) || 0,
               _type: "object",

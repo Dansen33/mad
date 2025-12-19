@@ -113,11 +113,11 @@ export async function POST(request: Request) {
   const quantity = Math.max(1, Number(body?.quantity) || 1);
   const upgrades = Array.isArray(body?.upgrades)
     ? body.upgrades
-        .map((u: any) => ({
+        .map((u: { label?: unknown; deltaHuf?: unknown }) => ({
           label: typeof u?.label === "string" ? u.label : "",
           deltaHuf: Number(u?.deltaHuf) || 0,
         }))
-        .filter((u) => u.label && Number.isFinite(u.deltaHuf))
+        .filter((u: { label: string; deltaHuf: number }) => u.label && Number.isFinite(u.deltaHuf))
     : [];
   if (!slug) {
     return NextResponse.json({ message: "slug required" }, { status: 400 });

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type CartItem = {
   slug: string;
@@ -23,9 +23,9 @@ export function CartClient({ initialItems }: Props) {
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
 
   const upgradeSum = (item: CartItem) => (item.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
-  const lineTotal = (item: CartItem) => (item.priceHuf + upgradeSum(item)) * item.quantity;
+  const lineTotal = useCallback((item: CartItem) => (item.priceHuf + upgradeSum(item)) * item.quantity, []);
 
-  const totalHuf = useMemo(() => items.reduce((sum, item) => sum + lineTotal(item), 0), [items]);
+  const totalHuf = useMemo(() => items.reduce((sum, item) => sum + lineTotal(item), 0), [items, lineTotal]);
 
   const updateQuantity = async (slug: string, quantity: number) => {
     setLoadingSlug(slug);

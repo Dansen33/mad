@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ProductHeader } from "@/components/product-header";
@@ -10,6 +10,14 @@ import { SiteFooter } from "@/components/site-footer";
 export const dynamic = "force-dynamic";
 
 export default function BejelentkezesPage() {
+  return (
+    <Suspense fallback={null}>
+      <BejelentkezesContent />
+    </Suspense>
+  );
+}
+
+function BejelentkezesContent() {
   const searchParams = useSearchParams();
   const errorParam = searchParams?.get("error");
   const [errorMsg, setErrorMsg] = useState<string | null>(
@@ -22,6 +30,7 @@ export default function BejelentkezesPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (errorParam === "CredentialsSignin") setErrorMsg("Hibás email vagy jelszó");
   }, [errorParam]);
 

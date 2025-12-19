@@ -7,6 +7,7 @@ import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 import { UpgradePicker } from "@/components/upgrade-picker";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { RecentlyViewed } from "@/components/recently-viewed";
 
 type ProdImage = { url: string; alt?: string | null; _key?: string };
 type ProductData = {
@@ -56,6 +57,8 @@ type ProductData = {
     warranty?: string;
   };
   stock?: number;
+  shippingTime?: string;
+  warranty?: string;
 };
 
 type UpgradePricing = {
@@ -106,6 +109,19 @@ export default async function ProductPage({ params }: PageProps) {
   const conditionLabels: Record<string, string> = {
     UJ: "Új",
     FELUJITOTT: "Felújított",
+  };
+  const shippingLabels: Record<string, string> = {
+    "2_nap": "2 napon belül",
+    "2_3_nap": "2-3 napon belül",
+    "3_4_nap": "3-4 napon belül",
+    "4_5_nap": "4-5 napon belül",
+    "5_6_nap": "5-6 napon belül",
+  };
+  const warrantyLabels: Record<string, string> = {
+    "12_ho": "12 hó",
+    "24_ho": "24 hó",
+    "36_ho": "36 hó",
+    "48_ho": "48 hó",
   };
   const categoryList: string[] = Array.isArray(product.categories)
     ? product.categories.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
@@ -320,25 +336,21 @@ export default async function ProductPage({ params }: PageProps) {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Készlet</div>
+                <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
                 <div className="text-sm font-semibold text-foreground">
-                  {product.stock ?? "—"} db | 24-48h szállítás
+                  {shippingLabels[product.shippingTime ?? ""] || product.shippingTime || "—"}
                 </div>
               </div>
 
               <div className="rounded-xl border border-border bg-secondary p-3">
                 <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
-                <div className="text-sm font-semibold text-foreground">12 hó (bővíthető 24 hó)</div>
-              </div>
-
-              <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Fizetés</div>
-                <div className="text-sm font-semibold text-foreground">Kártya, Stripe, átutalás</div>
-              </div>
-
-              <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Szerviz</div>
-                <div className="text-sm font-semibold text-foreground">Bevizsgálva, újrapasztázva, tisztítva</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {warrantyLabels[product.warranty ?? ""] ||
+                    warrantyLabels[product.specs?.warranty ?? ""] ||
+                    product.warranty ||
+                    product.specs?.warranty ||
+                    "—"}
+                </div>
               </div>
             </div>
           </div>
@@ -355,6 +367,18 @@ export default async function ProductPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+
+        <RecentlyViewed
+          current={{
+            slug: product.slug,
+            name: product.name,
+            href: `/termek/${product.slug}`,
+            image: images[0]?.url,
+            price: product.priceHuf,
+            finalPrice,
+            compareAt,
+          }}
+        />
       </div>
 
       <SiteFooter />

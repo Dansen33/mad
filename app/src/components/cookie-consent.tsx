@@ -10,6 +10,15 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 180; // 180 nap
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 const fbPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
 
+type FbqFunc = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[];
+  loaded?: boolean;
+  version?: string;
+  push: (...args: unknown[]) => void;
+  allowDuplicatePageViews?: boolean;
+};
+
 function readConsent(): ConsentState | null {
   if (typeof document === "undefined") return null;
   const raw = document.cookie
@@ -36,10 +45,11 @@ function writeConsent(marketing: boolean) {
 
 function loadGtm(id: string) {
   if (typeof window === "undefined") return;
-  if ((window as any)._gtmLoaded) return;
-  (window as any)._gtmLoaded = true;
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  (window as any).dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+  const w = window as typeof window & { _gtmLoaded?: boolean; dataLayer?: Record<string, unknown>[] };
+  if (w._gtmLoaded) return;
+  w._gtmLoaded = true;
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
   const script = document.createElement("script");
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtm.js?id=${id}`;
@@ -48,22 +58,27 @@ function loadGtm(id: string) {
 
 function loadFbPixel(id: string) {
   if (typeof window === "undefined") return;
-  if ((window as any)._fbqLoaded) return;
-  (window as any)._fbqLoaded = true;
-  const n = (window as any).fbq;
+  const w = window as typeof window & { _fbqLoaded?: boolean; fbq?: FbqFunc };
+  if (w._fbqLoaded) return;
+  w._fbqLoaded = true;
+  const n = w.fbq;
   if (!n) {
-    const fbq: any = function () {
-      fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
-    };
+    const fbq = function fbqFunc(this: unknown, ...args: unknown[]) {
+      if (fbq.callMethod) {
+        fbq.callMethod(...args);
+      } else {
+        fbq.queue.push(args);
+      }
+    } as unknown as FbqFunc;
     fbq.queue = [];
     fbq.loaded = true;
     fbq.version = "2.0";
     fbq.push = fbq;
     fbq.allowDuplicatePageViews = true;
-    (window as any).fbq = fbq;
+    w.fbq = fbq;
   }
-  (window as any).fbq("init", id);
-  (window as any).fbq("track", "PageView");
+  w.fbq?.("init", id);
+  w.fbq?.("track", "PageView");
   const script = document.createElement("script");
   script.async = true;
   script.src = "https://connect.facebook.net/en_US/fbevents.js";
@@ -84,6 +99,7 @@ export function CookieConsent() {
   useEffect(() => {
     const existing = readConsent();
     if (existing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMarketing(existing.marketing);
       setShow(false);
       enableTracking(existing.marketing);

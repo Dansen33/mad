@@ -19,6 +19,7 @@ export const allHeroSlidesQuery = groq`
 export const featuredProductQuery = groq`
 *[_type=="siteSettings"][0]{
   featuredProduct->{
+    _type,
     _id,
     name,
     "slug": slug.current,
@@ -70,6 +71,59 @@ export const featuredProductQuery = groq`
     "finalPriceHuf": priceHuf - coalesce(discountHufs[0], 0),
     "invalidDiscount": (priceHuf - coalesce(discountHufs[0], 0)) < 0
   }
+}
+`;
+
+export const featuredProductsCarouselQuery = groq`
+*[_type=="siteSettings"][0]{
+  featuredProducts[]->{
+    _type,
+    _id,
+    name,
+    "slug": slug.current,
+    priceHuf,
+    brand,
+    shortDescription,
+    stock,
+    "images": images[]{ "url": asset->url, alt },
+    // Kedvezmény számítás
+    "discounts": *[_type=="discount" && active == true && (!defined(startsAt) || startsAt <= now()) && (!defined(endsAt) || endsAt >= now()) && references(^._id)]|order(amount desc){
+      type,
+      amount
+    },
+    "discountHufs": discounts[]{
+      "d": select(
+        type == "percent" => round(^.priceHuf * amount / 100),
+        type == "fixed" => amount,
+        0
+      )
+    }.d,
+    "discountHuf": coalesce(discountHufs[0], 0),
+    "compareAtHuf": priceHuf,
+    "finalPriceHuf": priceHuf - coalesce(discountHufs[0], 0),
+    "invalidDiscount": (priceHuf - coalesce(discountHufs[0], 0)) < 0
+  }
+}
+`;
+
+export const headerAnnouncementQuery = groq`
+*[_type=="siteSettings"][0]{
+  announcement{
+    enabled,
+    text,
+    link
+  }
+}
+`;
+
+export const testimonialsQuery = groq`
+*[_type=="testimonial"]|order(order asc, _createdAt desc)[0...6]{
+  _id,
+  name,
+  title,
+  quote,
+  rating,
+  "avatar": avatar.asset->url
 }
 `;
 
@@ -182,6 +236,8 @@ export const productBySlugQuery = groq`
   priceHuf,
   brand,
   condition,
+  shippingTime,
+  warranty,
   shortDescription,
   description,
   categories,

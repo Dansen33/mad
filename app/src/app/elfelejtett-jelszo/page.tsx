@@ -24,9 +24,10 @@ export default function ForgotPasswordPage() {
       if (!res.ok) throw new Error(data?.message || "Hiba");
       setStatus("sent");
       setMessage("Ha létezik a fiók, elküldtük az email címedre a visszaállító linket.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus("error");
-      setMessage(err?.message || "Hiba történt a kérés során.");
+      const msg = err instanceof Error ? err.message : "Hiba történt a kérés során.";
+      setMessage(msg);
     }
   };
 

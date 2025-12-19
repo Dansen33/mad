@@ -97,8 +97,6 @@ async function readCart() {
 export default async function CheckoutPage() {
   const { items, totalHuf } = await readCart();
   const shipping = 2490;
-  const upgradeSum = (item: CartItem) => (item.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
-  const lineTotal = (item: CartItem) => (item.priceHuf + upgradeSum(item)) * item.quantity;
   const grandTotal = totalHuf + (items.length ? shipping : 0);
 
   return (

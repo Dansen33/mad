@@ -163,4 +163,19 @@
   .light .shadow-black\/50 {
     --tw-shadow-color: rgba(0,0,0,0.08);
   }
+
+  /* Egységes dropdown ikon minden selecten (desktop + mobil) */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("/dropdown.svg");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+    padding-right: 40px;
+  }
+  select::-ms-expand {
+    display: none;
+  }
 }

@@ -145,7 +145,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
           ref={containerRef}
           className="relative hidden min-w-[260px] max-w-full flex-1 items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg shadow-black/30 md:flex"
         >
-          <span className="text-lg">🔎</span>
+          <Image src="/searchicon.svg" alt="" width={16} height={16} className="shrink-0" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -226,7 +226,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
               if (query.length >= 2) setOpen(true);
             }}
           >
-            🔎
+            <Image src="/searchicon.svg" alt="" width={18} height={18} />
           </button>
 
           {mobileOpen && (
@@ -236,7 +236,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-2">
-                  <span className="text-lg">🔎</span>
+                  <Image src="/searchicon.svg" alt="" width={16} height={16} className="shrink-0" />
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

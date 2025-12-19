@@ -5,6 +5,7 @@ import { sanityClient } from "@/lib/sanity";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { RecentlyViewed } from "@/components/recently-viewed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,6 +21,8 @@ type PhoneData = {
   discounts?: { type?: string; amount?: number }[];
   brand?: string;
   condition?: string;
+  shippingTime?: string;
+  warranty?: string;
   shortDescription?: string;
   info?: string;
   specs?: {
@@ -43,6 +46,8 @@ async function fetchPhone(slug: string) {
       priceHuf,
       brand,
       condition,
+      shippingTime,
+      warranty,
       shortDescription,
       info,
       specs{
@@ -116,6 +121,19 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
     { label: "Operációs rendszer", value: specs.os },
     { label: "Kapcsolatok", value: specs.connectivity },
   ].filter((s) => s.value && String(s.value).trim().length > 0);
+  const shippingLabels: Record<string, string> = {
+    "2_nap": "2 napon belül",
+    "2_3_nap": "2-3 napon belül",
+    "3_4_nap": "3-4 napon belül",
+    "4_5_nap": "4-5 napon belül",
+    "5_6_nap": "5-6 napon belül",
+  };
+  const warrantyLabels: Record<string, string> = {
+    "12_ho": "12 hó",
+    "24_ho": "24 hó",
+    "36_ho": "36 hó",
+    "48_ho": "48 hó",
+  };
 
   const price =
     typeof finalPrice === "number"
@@ -195,6 +213,21 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
             </div>
             <AddToCartButton productSlug={phone.slug} productName={phone.name} />
 
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-secondary p-3">
+                <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {shippingLabels[phone.shippingTime ?? ""] || phone.shippingTime || "—"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-secondary p-3">
+                <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {warrantyLabels[phone.warranty ?? ""] || phone.warranty || "—"}
+                </div>
+              </div>
+            </div>
+
             <div className="rounded-xl border border-border bg-secondary p-3">
               <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
               <div className="text-sm font-semibold text-foreground whitespace-pre-line">
@@ -215,6 +248,20 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 pb-16">
+        <RecentlyViewed
+          current={{
+            slug: phone.slug,
+            name: phone.name,
+            href: `/telefonok/${phone.slug}`,
+            image: images[0]?.url,
+            price: basePrice,
+            finalPrice,
+            compareAt,
+          }}
+        />
       </div>
       <SiteFooter />
     </div>

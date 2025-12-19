@@ -146,7 +146,7 @@ export default function AdatvedelemPage() {
             Az élettartam meghosszabbodik minden látogatásnál. Az adatkezelés a XYZXYZ jogos érdeke csalás megelőzésére. További információk a tájékoztatóban.
           </p>
           <p>
-            <strong>Marketing cookie-k:</strong> XYZXYZMarketingConsent.xxx, Media and advertiser partners' cookie. Hozzájárulás szükséges. Cél: releváns reklámok és ajánlatok; adatkezelés az érintett viselkedésére alapozva.
+            <strong>Marketing cookie-k:</strong> XYZXYZMarketingConsent.xxx, Media and advertiser partners&apos; cookie. Hozzájárulás szükséges. Cél: releváns reklámok és ajánlatok; adatkezelés az érintett viselkedésére alapozva.
           </p>
         </section>
 

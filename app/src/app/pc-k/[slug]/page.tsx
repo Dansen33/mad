@@ -6,6 +6,7 @@ import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { UpgradePicker } from "@/components/upgrade-picker";
+import { RecentlyViewed } from "@/components/recently-viewed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,6 +23,8 @@ type PcData = {
   brand?: string;
   condition?: string;
   stock?: number;
+  shippingTime?: string;
+  warranty?: string;
   category?: string;
   allowMemoryUpgrades?: boolean;
   memoryUpgradeGroup?: "ddr4" | "ddr5";
@@ -60,6 +63,8 @@ async function fetchPc(slug: string) {
       brand,
       condition,
       stock,
+      shippingTime,
+      warranty,
       category,
       allowMemoryUpgrades,
       memoryUpgradeGroup,
@@ -147,6 +152,26 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
     UJ: "Új",
     FELUJITOTT: "Felújított",
   };
+  const categoryLabels: Record<string, string> = {
+    "gamer-pc-olcso-300-alatt": "Belépő kategóriás Gamer PC",
+    "gamer-pc-300-600": "Középkategóriás Gamer PC",
+    "gamer-pc-600-felett": "Felsőkategóriás Gamer PC",
+    "professzionalis-munkaallomas": "Professzionális Munkaállomás",
+    "felujitott-gamer-pc": "Felújított Gamer PC",
+  };
+  const shippingLabels: Record<string, string> = {
+    "2_nap": "2 napon belül",
+    "2_3_nap": "2-3 napon belül",
+    "3_4_nap": "3-4 napon belül",
+    "4_5_nap": "4-5 napon belül",
+    "5_6_nap": "5-6 napon belül",
+  };
+  const warrantyLabels: Record<string, string> = {
+    "12_ho": "12 hó",
+    "24_ho": "24 hó",
+    "36_ho": "36 hó",
+    "48_ho": "48 hó",
+  };
 
   const specs = pc.specs || {};
   const specsEntries = [
@@ -178,7 +203,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
           </Link>
           <span>/</span>
           <Link className="hover:text-primary" href="/pc-k/osszes">
-            PC-k
+            PC
           </Link>
           <span>/</span>
           <span className="text-foreground">{pc.name}</span>
@@ -222,7 +247,11 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                   {conditionLabels[pc.condition] || pc.condition}
                 </span>
               )}
-              {pc.category && <span className="rounded-full bg-primary/15 px-3 py-1">{pc.category}</span>}
+              {pc.category && (
+                <span className="rounded-full bg-primary/15 px-3 py-1">
+                  {categoryLabels[pc.category] || pc.category}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl font-extrabold">{pc.name}</h1>
             <p className="text-sm text-muted-foreground">
@@ -257,14 +286,16 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
             )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Készlet</div>
+                <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
                 <div className="text-sm font-semibold text-foreground">
-                  {pc.stock ?? "—"} db | 24-48h szállítás
+                  {shippingLabels[pc.shippingTime ?? ""] || pc.shippingTime || "—"}
                 </div>
               </div>
               <div className="rounded-xl border border-border bg-secondary p-3">
                 <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
-                <div className="text-sm font-semibold text-foreground">12 hó (bővíthető)</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {warrantyLabels[pc.warranty ?? ""] || pc.warranty || "—"}
+                </div>
               </div>
             </div>
 
@@ -294,6 +325,18 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
             ))}
           </div>
         </div>
+
+        <RecentlyViewed
+          current={{
+            slug: pc.slug,
+            name: pc.name,
+            href: `/pc-k/${pc.slug}`,
+            image: images[0]?.url,
+            price: basePrice,
+            finalPrice,
+            compareAt,
+          }}
+        />
       </div>
       <SiteFooter />
     </div>

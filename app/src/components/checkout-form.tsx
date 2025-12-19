@@ -16,11 +16,11 @@ type CartItem = {
 type Props = {
   items: CartItem[];
   subtotal: number;
-  shipping: number; // fallback/initial
-  total: number; // fallback/initial
+  shipping?: number;
+  total?: number;
 };
 
-export function CheckoutForm({ items, subtotal, shipping, total }: Props) {
+export function CheckoutForm({ items, subtotal }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [billingSame, setBillingSame] = useState(true);
@@ -355,8 +355,8 @@ export function CheckoutForm({ items, subtotal, shipping, total }: Props) {
           <div className="space-y-2">
             {(shippingMethods.length
               ? shippingMethods
-              : [{ id: "standard", label: "Standard futár (1-2 munkanap)"}]
-            ).map((opt, idx) => (
+              : [{ id: "standard", label: "Standard futár (1-2 munkanap)", priceHuf: 0 }]
+            ).map((opt) => (
               <label
                 key={opt.id}
                 className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-secondary px-3 py-2 text-sm"
@@ -556,8 +556,7 @@ export function CheckoutForm({ items, subtotal, shipping, total }: Props) {
           {status === "loading" ? "Rendelés küldése..." : "Rendelés leadása"}
         </button>
         <p className="text-xs text-muted-foreground">
-          A rendelés leadásával elfogadod az ÁSZF-et és az Adatvédelmi tájékoztatót. A fizetés és
-          szállítás részleteit a következő lépésben erősítheted meg.
+          A rendelés leadásával elfogadod az ÁSZF-et és az Adatvédelmi tájékoztatót.
         </p>
       </div>
     </form>

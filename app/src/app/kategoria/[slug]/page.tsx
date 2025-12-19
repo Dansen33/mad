@@ -245,7 +245,7 @@ export default async function CategoryPage({
         ? [{ field: "priceHuf", direction: "desc" as const }]
         : [{ field: "_createdAt", direction: "desc" as const }];
 
-  const products = await sanityClient.fetch(
+  const products: ProductHit[] = await sanityClient.fetch<ProductHit[]>(
     `*[_type=="product" && ($category in categories || (!defined(categories) && category==$category)) 
       && (!defined($brand) || lower(brand)==lower($brand))
       && (!defined($cpu) || lower(specs.processor)==lower($cpu))

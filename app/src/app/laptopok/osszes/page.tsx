@@ -4,6 +4,6 @@ import AllProductsPage from "@/app/kategoria/osszes/page";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function LaptopokOsszes(props: any) {
+export default function LaptopokOsszes(props: Parameters<typeof AllProductsPage>[0]) {
   return <AllProductsPage {...props} />;
 }

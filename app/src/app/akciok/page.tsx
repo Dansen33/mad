@@ -3,12 +3,10 @@ import Image from "next/image";
 import { sanityClient } from "@/lib/sanity";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
-import { PriceSlider } from "@/components/price-slider";
+import { FilterForm } from "./filter-form";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 type SaleHit = {
   _id?: string;
@@ -21,6 +19,9 @@ type SaleHit = {
   finalPriceHuf?: number;
   invalidDiscount?: boolean;
   discounts?: { type?: string; amount?: number }[];
+  final?: number;
+  compareAt?: number;
+  hasDiscount?: boolean;
   images?: { url: string; alt?: string | null }[];
   specs?: {
     processor?: string;
@@ -37,184 +38,13 @@ function formatPrice(value?: number) {
   return `${new Intl.NumberFormat("hu-HU").format(value)} Ft`;
 }
 
-function FilterForm({
-  sort,
-  brand,
-  type,
-  cpu,
-  memory,
-  gpu,
-  storage,
-  display,
-  priceMax,
-  brands,
-  cpus,
-  memories,
-  gpus,
-  storages,
-  displays,
-  ceilPrice,
-  filterKey,
-  clearHref,
-}: {
-  sort: string;
-  brand?: string;
-  type?: string;
-  cpu?: string;
-  memory?: string;
-  gpu?: string;
-  storage?: string;
-  display?: string;
-  priceMax?: number;
-  brands: string[];
-  cpus: string[];
-  memories: string[];
-  gpus: string[];
-  storages: string[];
-  displays: string[];
-  ceilPrice: number;
-  filterKey: string;
-  clearHref: string;
-}) {
-  return (
-    <form className="space-y-4" method="get" key={filterKey}>
-      <input type="hidden" name="sort" value={sort} />
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Ár</label>
-        <PriceSlider
-          name="priceMax"
-          min={0}
-          max={ceilPrice || 0}
-          defaultValue={priceMax ?? (ceilPrice || 0)}
-          hiddenMinName="priceMin"
-          hiddenMinValue={0}
-        />
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Terméktípus</label>
-        <select
-          name="type"
-          defaultValue={type || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          <option value="product">Laptopok</option>
-          <option value="pc">PC-k</option>
-          <option value="phone">Telefonok</option>
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Márka</label>
-        <select
-          name="brand"
-          defaultValue={brand || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {brands.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Processzor</label>
-        <select
-          name="cpu"
-          defaultValue={cpu || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {cpus.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Memória</label>
-        <select
-          name="memory"
-          defaultValue={memory || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {memories.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Grafikus vezérlő</label>
-        <select
-          name="gpu"
-          defaultValue={gpu || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {gpus.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Háttértár</label>
-        <select
-          name="storage"
-          defaultValue={storage || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {storages.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs font-semibold uppercase text-muted-foreground">Kijelző</label>
-        <select
-          name="display"
-          defaultValue={display || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
-        >
-          <option value="">Összes</option>
-          {displays.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button
-        type="submit"
-        className="w-full cursor-pointer rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 transition duration-150 hover:scale-[1.02]"
-      >
-        Szűrés
-      </button>
-      <Link
-        href={clearHref}
-        className="block cursor-pointer text-center text-xs font-semibold text-muted-foreground transition duration-150 hover:scale-[1.02] hover:text-primary"
-      >
-        Szűrők törlése
-      </Link>
-    </form>
-  );
-}
-
 export default async function AkciokPage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const qs = (await searchParams) ?? {};
   const rawSort = typeof qs.sort === "string" ? qs.sort : "latest";
   const sort = rawSort === "default" ? "latest" : rawSort;
   const brand = typeof qs.brand === "string" ? qs.brand : "";
   const type = typeof qs.type === "string" ? qs.type : "";
+  const soc = typeof qs.soc === "string" ? qs.soc : "";
   const cpu = typeof qs.cpu === "string" ? qs.cpu : "";
   const memory = typeof qs.memory === "string" ? qs.memory : "";
   const gpu = typeof qs.gpu === "string" ? qs.gpu : "";
@@ -278,11 +108,18 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
     if (type && item._type !== type) return false;
     if (brand && item.brand && item.brand.toLowerCase() !== brand.toLowerCase()) return false;
     const specs = item.specs || {};
-    if (cpu && specs.processor && specs.processor.toLowerCase() !== cpu.toLowerCase()) return false;
-    if (memory && specs.memory && specs.memory.toLowerCase() !== memory.toLowerCase()) return false;
-    if (gpu && specs.gpu && specs.gpu.toLowerCase() !== gpu.toLowerCase()) return false;
-    if (storage && specs.storage && specs.storage.toLowerCase() !== storage.toLowerCase()) return false;
-    if (display && specs.display && specs.display.toLowerCase() !== display.toLowerCase()) return false;
+    if (type === "phone") {
+      if (soc && specs.soc && specs.soc.toLowerCase() !== soc.toLowerCase()) return false;
+      if (memory && specs.memory && specs.memory.toLowerCase() !== memory.toLowerCase()) return false;
+      if (storage && specs.storage && specs.storage.toLowerCase() !== storage.toLowerCase()) return false;
+      if (display && specs.display && specs.display.toLowerCase() !== display.toLowerCase()) return false;
+    } else {
+      if (cpu && specs.processor && specs.processor.toLowerCase() !== cpu.toLowerCase()) return false;
+      if (memory && specs.memory && specs.memory.toLowerCase() !== memory.toLowerCase()) return false;
+      if (gpu && specs.gpu && specs.gpu.toLowerCase() !== gpu.toLowerCase()) return false;
+      if (storage && specs.storage && specs.storage.toLowerCase() !== storage.toLowerCase()) return false;
+      if (display && specs.display && specs.display.toLowerCase() !== display.toLowerCase()) return false;
+    }
     if (typeof priceMax === "number" && Number.isFinite(priceMax) && item.final > priceMax) return false;
     return true;
   });
@@ -304,16 +141,27 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
     ).sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
   };
 
-  const brands = collect(discounted, (x) => x.brand);
-  const cpus = collect(discounted, (x) => x.specs?.processor);
-  const memories = collect(discounted, (x) => x.specs?.memory);
-  const gpus = collect(discounted, (x) => x.specs?.gpu);
-  const storages = collect(discounted, (x) => x.specs?.storage);
-  const displays = collect(discounted, (x) => x.specs?.display || x.specs?.soc);
+  const buildFacets = (source: SaleHit[]) => {
+    const brands = collect(source, (x) => x.brand);
+    const socs = collect(source, (x) => x.specs?.soc);
+    const cpus = collect(source, (x) => x.specs?.processor);
+    const memories = collect(source, (x) => x.specs?.memory);
+    const gpus = collect(source, (x) => x.specs?.gpu);
+    const storages = collect(source, (x) => x.specs?.storage);
+    const displays = collect(source, (x) => x.specs?.display || x.specs?.soc);
+    const priceValues = source.map((x) => x.final).filter((v): v is number => typeof v === "number");
+    const ceilPrice = priceValues.length ? Math.max(...(priceValues as number[])) : 0;
+    return { brands, socs, cpus, memories, gpus, storages, displays, ceilPrice };
+  };
 
-  const priceValues = discounted.map((x) => x.final).filter((v): v is number => typeof v === "number");
-  const ceilPrice = priceValues.length ? Math.max(...(priceValues as number[])) : 0;
-  const filterKey = [sort, brand, type, cpu, memory, gpu, storage, display, priceMax ?? ""].join("|");
+  const facets = {
+    all: buildFacets(discounted),
+    product: buildFacets(discounted.filter((x) => x._type === "product")),
+    pc: buildFacets(discounted.filter((x) => x._type === "pc")),
+    phone: buildFacets(discounted.filter((x) => x._type === "phone")),
+  };
+
+  const filterKey = [sort, brand, type, soc, cpu, memory, gpu, storage, display, priceMax ?? ""].join("|");
 
   const resolveHref = (item: SaleHit) => {
     if (item._type === "pc") return `/pc-k/${item.slug}`;
@@ -346,77 +194,105 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
           </div>
         </div>
 
-        <FilterForm
-          brand={brand}
-          type={type}
-          cpu={cpu}
-          memory={memory}
-          gpu={gpu}
-          storage={storage}
-          display={display}
-          priceMax={priceMax}
-          brands={brands}
-          cpus={cpus}
-          memories={memories}
-          gpus={gpus}
-          storages={storages}
-          displays={displays}
-          ceilPrice={ceilPrice}
-          clearHref="/akciok"
-          filterKey={filterKey}
-        />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {sorted.map((item) => {
-            const firstImage = item.images?.[0]?.url;
-            return (
-              <div
-                key={item._id || item.slug}
-                className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
-              >
-                <Link href={resolveHref(item)} className="block overflow-hidden rounded-lg border border-border">
-                  <div className="relative aspect-square w-full">
-                    <Image
-                      fill
-                      src={
-                        firstImage ||
-                        "https://dummyimage.com/600x400/0f1320/ffffff&text=PrimeLaptop"
-                      }
-                      alt={item.name}
-                      className="object-cover transition duration-300 hover:scale-105"
-                      sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 80vw"
-                      unoptimized
-                    />
-                  </div>
-                </Link>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs uppercase text-primary">{item.brand}</div>
-                  <Link href={resolveHref(item)} className="font-semibold hover:text-primary">
-                    {item.name}
-                  </Link>
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="text-sm font-semibold text-muted-foreground line-through">
-                      {formatPrice(item.compareAt)}
-                    </span>
-                    <span className="text-2xl font-extrabold text-primary">
-                      {formatPrice(item.final)}
-                    </span>
-                  </div>
-                </div>
-                <Link
-                  href={resolveHref(item)}
-                  className="mt-auto inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
-                >
-                  Megnézem
-                </Link>
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="w-full lg:hidden">
+            <details className="rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
+                Szűrők <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
+              </summary>
+              <div className="mt-3 border-t border-border pt-3">
+                <FilterForm
+                  key={filterKey}
+                  sort={sort}
+                  brand={brand}
+                  type={type}
+                  soc={soc}
+                  cpu={cpu}
+                  memory={memory}
+                  gpu={gpu}
+                  storage={storage}
+                  display={display}
+                  priceMax={priceMax}
+                  facets={facets}
+                  clearHref="/akciok"
+                  filterKey={filterKey}
+                />
               </div>
-            );
-          })}
-          {discounted.length === 0 && (
-            <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-              Jelenleg nincs akciós termék.
-            </div>
-          )}
+            </details>
+          </div>
+
+          <aside className="hidden h-max w-[260px] shrink-0 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 lg:block">
+            <div className="mb-4 text-lg font-extrabold">Szűrők</div>
+            <FilterForm
+              key={filterKey}
+              sort={sort}
+              brand={brand}
+              type={type}
+              soc={soc}
+              cpu={cpu}
+              memory={memory}
+              gpu={gpu}
+              storage={storage}
+              display={display}
+              priceMax={priceMax}
+              facets={facets}
+              clearHref="/akciok"
+              filterKey={filterKey}
+            />
+          </aside>
+
+          <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {sorted.map((item) => {
+              const firstImage = item.images?.[0]?.url;
+              return (
+                <div
+                  key={item._id || item.slug}
+                  className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
+                >
+                  <Link href={resolveHref(item)} className="block overflow-hidden rounded-lg border border-border">
+                    <div className="relative aspect-square w-full">
+                      <Image
+                        fill
+                        src={
+                          firstImage ||
+                          "https://dummyimage.com/600x400/0f1320/ffffff&text=PrimeLaptop"
+                        }
+                        alt={item.name}
+                        className="object-cover transition duration-300 hover:scale-105"
+                        sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 80vw"
+                        unoptimized
+                      />
+                    </div>
+                  </Link>
+                  <div className="flex flex-col gap-1">
+                    <div className="text-xs uppercase text-primary">{item.brand}</div>
+                    <Link href={resolveHref(item)} className="font-semibold hover:text-primary">
+                      {item.name}
+                    </Link>
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="text-sm font-semibold text-muted-foreground line-through">
+                        {formatPrice(item.compareAt)}
+                      </span>
+                      <span className="text-2xl font-extrabold text-primary">
+                        {formatPrice(item.final)}
+                      </span>
+                    </div>
+                  </div>
+                  <Link
+                    href={resolveHref(item)}
+                    className="mt-auto inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 transition duration-150 hover:brightness-95"
+                  >
+                    Megnézem
+                  </Link>
+                </div>
+              );
+            })}
+            {discounted.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+                Jelenleg nincs akciós termék.
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <SiteFooter />

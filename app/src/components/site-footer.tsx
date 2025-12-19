@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -40,19 +41,19 @@ export function SiteFooter() {
             </h3>
             <div className="grid gap-2 text-sm text-muted-foreground">
               <Link className="hover:text-foreground" href="/laptopok/osszes">
-                Laptopok
+                Laptop
               </Link>
               <Link className="hover:text-foreground" href="/pc-k/osszes">
-                PC-k
+                PC
               </Link>
               <Link className="hover:text-foreground" href="/pc-k/kategoria/gamer-pc-300-600">
-                Gamer PC-k
+                Gamer PC
               </Link>
               <Link className="hover:text-foreground" href="/pc-k/kategoria/professzionalis-munkaallomas">
                 Munkaállomások
               </Link>
               <Link className="hover:text-foreground" href="/telefonok/osszes">
-                Telefonok
+                Telefon
               </Link>
             </div>
           </div>

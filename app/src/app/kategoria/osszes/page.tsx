@@ -23,6 +23,7 @@ type ProductHit = {
   _createdAt?: string;
   shortDescription?: string;
   images?: { url: string; alt?: string | null }[];
+  effectivePrice?: number;
   specs?: {
     processor?: string;
     memory?: string;
@@ -31,6 +32,8 @@ type ProductHit = {
     display?: string;
   };
 };
+
+type ProductWithEffective = ProductHit & { effectivePrice: number };
 
 type FacetRow = {
   brand?: string;
@@ -63,7 +66,6 @@ type FilterFormProps = {
   gpus: string[];
   displays: string[];
   storages: string[];
-  floorPrice: number;
   ceilPrice: number;
   clearHref: string;
 };
@@ -87,7 +89,6 @@ function FilterForm({
   gpus,
   displays,
   storages,
-  floorPrice,
   ceilPrice,
   clearHref,
 }: FilterFormProps) {
@@ -291,6 +292,8 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
     { label: "Workstation", value: "WORKSTATION" },
     { label: "Érintőképernyős", value: "TOUCH" },
   ];
+  const categoryLabelMap = Object.fromEntries(categoryOptions.map((c) => [c.value, c.label]));
+  const conditionLabelMap: Record<string, string> = { UJ: "Új", FELUJITOTT: "Felújított" };
 
   const orderBy =
     sort === "price-asc"
@@ -377,7 +380,7 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
     },
   );
 
-  const productsWithEffective = products.map((item: ProductHit) => {
+  const productsWithEffective: ProductWithEffective[] = products.map((item: ProductHit) => {
     const basePrice = typeof item.priceHuf === "number" ? item.priceHuf : 0;
     const discounts = Array.isArray(item.discounts) ? item.discounts : [];
     const bestDiscount =
@@ -455,9 +458,8 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
   const displays = collect(facetRows, (x) => x.specs?.display);
   const storages = collect(facetRows, (x) => x.specs?.storage);
   const priceValues = productsWithEffective
-    .map((p) => (p as any).effectivePrice as number)
-    .filter((v) => typeof v === "number" && Number.isFinite(v));
-  const floorPrice = priceValues.length ? Math.min(...priceValues) : 0;
+    .map((p) => p.effectivePrice as number)
+    .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
   const ceilPrice = priceValues.length ? Math.max(...priceValues) : 0;
 
   const filterKey = [
@@ -493,7 +495,6 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
     gpus,
     displays,
     storages,
-    floorPrice,
     ceilPrice,
     clearHref: "/kategoria/osszes",
   };
@@ -507,15 +508,58 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
             Főoldal
           </Link>
           <span>/</span>
-          <span className="text-foreground">Összes laptop</span>
+          <span className="text-foreground">
+            {(() => {
+              if (categories.length === 1) return categoryLabelMap[categories[0]] || "Laptopok";
+              if (categories.length > 1) return "Szűrt laptopok";
+              if (brand) return `${brand} laptopok`;
+              return "Összes laptop";
+            })()}
+          </span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card px-4 py-3 shadow-lg shadow-black/30">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase text-primary">Összes</div>
-              <h1 className="text-2xl font-extrabold">Minden laptop</h1>
-              <p className="text-sm text-muted-foreground">Márkák, kategóriák, specifikációk szerint.</p>
+              {(() => {
+                const primaryCat =
+                  categories.length === 1 ? categoryLabelMap[categories[0]] : categories.length > 1 ? "Szűrt" : null;
+                const conditionLabel = condition ? conditionLabelMap[condition] || condition : null;
+                const hasMultipleCats = categories.length > 1;
+                const kicker = primaryCat
+                  ? primaryCat
+                  : brand
+                    ? brand
+                    : conditionLabel
+                      ? conditionLabel
+                      : "Összes";
+                let title = "Minden laptop";
+                if (brand && primaryCat) {
+                  title = `${brand} ${primaryCat.toLowerCase()} laptopok`;
+                } else if (primaryCat && !hasMultipleCats) {
+                  title = `${primaryCat} laptopok`;
+                } else if (brand) {
+                  title = `${brand} laptopok`;
+                } else if (hasMultipleCats) {
+                  title = "Szűrt laptopok";
+                } else if (conditionLabel) {
+                  title = `${conditionLabel} laptopok`;
+                }
+                if (conditionLabel && !title.toLowerCase().includes(conditionLabel.toLowerCase())) {
+                  title = `${title} – ${conditionLabel}`;
+                }
+                const subtitle =
+                  hasMultipleCats || primaryCat || brand || conditionLabel
+                    ? "Szűrt találatok a beállított feltételekkel."
+                    : "Márkák, kategóriák, specifikációk szerint.";
+                return (
+                  <>
+                    <div className="text-xs uppercase text-primary">{kicker}</div>
+                    <h1 className="text-2xl font-extrabold">{title}</h1>
+                    <p className="text-sm text-muted-foreground">{subtitle}</p>
+                  </>
+                );
+              })()}
             </div>
             <div className="flex flex-col items-end gap-2 text-xs font-semibold text-muted-foreground sm:flex-row sm:items-center sm:gap-3">
               <SortSelect
@@ -548,6 +592,20 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
           </aside>
 
           <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {!sortedProducts.length && (
+              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                <p className="mt-1">
+                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                </p>
+                <Link
+                  href="/kategoria/osszes"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                >
+                  Összes laptop megtekintése
+                </Link>
+              </div>
+            )}
             {sortedProducts.map((item: ProductHit) => {
               const firstImage = item.images?.[0]?.url;
               const discounts = Array.isArray(item.discounts) ? item.discounts : [];

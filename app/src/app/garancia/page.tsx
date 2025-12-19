@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
 title: "Garancia | WELLCOMP",
-description: "Garanciális feltételek: alap 12 hónap, bővíthető opciók, bevizsgált eszközök.",
+description: "Garanciális feltételek: alap 12 hónap, bővíthető opciók, bevizsgált, új eszközök.",
 };
 
 export default function GaranciaPage() {

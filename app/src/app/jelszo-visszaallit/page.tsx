@@ -1,13 +1,21 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
 
 export default function PasswordResetPage() {
+  return (
+    <Suspense fallback={null}>
+      <PasswordResetContent />
+    </Suspense>
+  );
+}
+
+function PasswordResetContent() {
   const searchParams = useSearchParams();
   const presetEmail = searchParams?.get("email") || "";
   const presetToken = searchParams?.get("token") || "";
@@ -37,9 +45,10 @@ export default function PasswordResetPage() {
       if (!res.ok) throw new Error(data?.message || "Hiba");
       setStatus("reset");
       setMessage("Jelszó frissítve. Jelentkezz be az új jelszóval.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus("error");
-      setMessage(err?.message || "Hiba a frissítésnél.");
+      const msg = err instanceof Error ? err.message : "Hiba a frissítésnél.";
+      setMessage(msg);
     }
   };
 
