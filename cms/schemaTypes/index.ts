@@ -11,6 +11,7 @@ import shipping from "./schemas/shipping";
 import coupon from "./schemas/coupon";
 import popularCategory from "./schemas/popularCategory";
 import discount from "./schemas/discount";
+import testimonial from "./schemas/testimonial";
 
 export const schemaTypes = [
   product,
@@ -26,4 +27,5 @@ export const schemaTypes = [
   coupon,
   popularCategory,
   discount,
+  testimonial,
 ];

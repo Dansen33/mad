@@ -71,10 +71,39 @@ export default defineType({
       description: "Válaszd ki, hogy a termék új vagy felújított.",
     }),
     defineField({
+      name: "shippingTime",
+      title: "Szállítás",
+      type: "string",
+      options: {
+        list: [
+          { title: "2 napon belül", value: "2_nap" },
+          { title: "2-3 napon belül", value: "2_3_nap" },
+          { title: "3-4 napon belül", value: "3_4_nap" },
+          { title: "4-5 napon belül", value: "4_5_nap" },
+          { title: "5-6 napon belül", value: "5_6_nap" },
+        ],
+      },
+      description: "Válaszd ki a várható szállítási időt.",
+    }),
+    defineField({
       name: "stock",
-      title: "Készlet",
+      title: "Készlet (db)",
       type: "number",
       validation: (rule) => rule.min(0).integer(),
+    }),
+    defineField({
+      name: "warranty",
+      title: "Garancia",
+      type: "string",
+      options: {
+        list: [
+          { title: "12 hó", value: "12_ho" },
+          { title: "24 hó", value: "24_ho" },
+          { title: "36 hó", value: "36_ho" },
+          { title: "48 hó", value: "48_ho" },
+        ],
+      },
+      description: "Válaszd ki a garancia időtartamát.",
     }),
     defineField({
       name: "memoryUpgradeGroup",
@@ -144,7 +173,7 @@ export default defineType({
         { name: "moreExtras", title: "További extrák", type: "text" },
         { name: "size", title: "Méret", type: "string" },
         { name: "weight", title: "Súly", type: "string" },
-        { name: "warranty", title: "Garancia", type: "string" },
+        { name: "warranty", title: "Garancia (legacy)", type: "string", hidden: true },
       ],
     }),
     defineField({

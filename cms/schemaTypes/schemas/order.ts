@@ -98,6 +98,7 @@ export default defineType({
         list: [
           { title: "Leadva", value: "LEADVA" },
           { title: "Fizetve", value: "FIZETVE" },
+          { title: "Feldolgozva", value: "FELDOLGOZVA" },
           { title: "Számlázva", value: "SZAMLAZVA" },
           { title: "Kiküldve", value: "KIKULDVE" },
         ],
