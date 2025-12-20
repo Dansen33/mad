@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sanityClient } from "@/lib/sanity";
 
 export const dynamic = "force-dynamic";
 
@@ -106,6 +107,20 @@ export async function POST(req: Request) {
     if (!res.ok || !redirect) {
       console.error("Barion start hiba", res.status, data);
       return NextResponse.json({ message: "Barion start failed", detail: data }, { status: 500 });
+    }
+    // mentjük a PaymentId-t az orderre, hogy akkor is látszódjon, ha a felhasználó nem jön vissza
+    if (orderId && data?.PaymentId) {
+      try {
+        await sanityClient
+          .patch(orderId)
+          .set({
+            barionPaymentId: data.PaymentId,
+            barionStatus: data.Status || "Prepared",
+          })
+          .commit();
+      } catch (err) {
+        console.error("Order patch (Barion start) hiba", err);
+      }
     }
     return NextResponse.json({
       redirectUrl: redirect,
