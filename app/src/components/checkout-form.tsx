@@ -443,9 +443,9 @@ export function CheckoutForm({ items, subtotal }: Props) {
           <h2 className="text-lg font-extrabold">Fizetés</h2>
           <div className="space-y-2">
             {[
-              { id: "card", label: "Bankkártya (online)", note: "Stripe" },
-              { id: "wire", label: "Átutalás", note: "Pro forma díjbekérő alapján" },
-              { id: "cod", label: "Utánvét", note: "Készpénz/kártya futárnál" },
+              { id: "card", label: "Bankkártya", note: "Barion biztonságos fizetés" },
+              { id: "wire", label: "Átutalás", note: "Díjbekérő alapján" },
+              { id: "cod", label: "Utánvét", note: "Készpénz/bankkártya futárnál" },
             ].map((opt, idx) => (
               <label
                 key={opt.id}
@@ -648,9 +648,20 @@ export function CheckoutForm({ items, subtotal }: Props) {
         >
           {status === "loading" ? "Rendelés küldése..." : "Rendelés leadása"}
         </button>
+        <div className="mt-2 flex justify-center">
+          <Image
+            src="/barionbannersm.png"
+            alt="Barion"
+            width={320}
+            height={80}
+            className="h-20 w-auto"
+            unoptimized
+            priority
+          />
+        </div>
         {!termsError && (
           <p className="text-xs text-muted-foreground">
-            A rendelés leadásával elfogadod az ÁSZF-et és az Adatvédelmi tájékoztatót.
+            A vásárlásról AAM számlát állítunk ki, amelyet e-mailben küldünk el.
           </p>
         )}
       </div>

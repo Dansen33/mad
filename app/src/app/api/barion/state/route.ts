@@ -52,11 +52,27 @@ export async function GET(req: Request) {
       try {
         await sanityClient
           .patch(orderId)
-          .set({ status: "FIZETVE", barionPaymentId: data.PaymentId || paymentId, updatedAt: new Date().toISOString() })
+          .set({
+            status: "FIZETVE",
+            barionPaymentId: data.PaymentId || paymentId,
+            barionStatus: payStatus || txStatus || "Succeeded",
+          })
           .commit();
         await reduceStockForOrder(orderId);
       } catch (err) {
         console.error("Barion PaymentState patch error", err);
+      }
+    } else if (orderId && (payStatus === "Canceled" || payStatus === "Expired" || txStatus === "Canceled")) {
+      // jelöljük, hogy elhagyott/sikertelen fizetés
+      try {
+        await sanityClient
+          .patch(orderId)
+          .set({
+            barionStatus: "ABANDONED",
+          })
+          .commit();
+      } catch (err) {
+        console.error("Barion PaymentState abandoned patch error", err);
       }
     }
 

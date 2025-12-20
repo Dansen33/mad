@@ -44,15 +44,7 @@ export async function POST(req: Request) {
           return NextResponse.json({ received: true });
         }
 
-        await sanityClient
-          .patch(orderId)
-          .set({
-            status: "FIZETVE",
-            stripeSessionId: session.id,
-            stripePaymentIntent:
-              typeof session.payment_intent === "string" ? session.payment_intent : undefined,
-          })
-          .commit();
+        await sanityClient.patch(orderId).set({ status: "FIZETVE" }).commit();
 
         type ReducedItem = { slug?: string; quantity?: number };
         const items: ReducedItem[] = Array.isArray(order.items) ? order.items : [];

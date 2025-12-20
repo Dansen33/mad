@@ -23,7 +23,18 @@ export default defineType({
     defineField({ name: "address", title: "Cím", type: "string" }),
     defineField({ name: "note", title: "Megjegyzés", type: "text" }),
     defineField({ name: "shippingMethod", title: "Szállítási mód", type: "string" }),
-    defineField({ name: "paymentMethod", title: "Fizetési mód", type: "string" }),
+    defineField({
+      name: "paymentMethod",
+      title: "Fizetési mód",
+      type: "string",
+      options: {
+        list: [
+          { title: "Bankkártya", value: "Bankkártya" },
+          { title: "Átutalás", value: "Átutalás" },
+          { title: "Utánvét", value: "Utánvét" },
+        ],
+      },
+    }),
     defineField({
       name: "items",
       title: "Tételek",
@@ -67,8 +78,15 @@ export default defineType({
     defineField({ name: "subtotalHuf", title: "Részösszeg (HUF)", type: "number" }),
     defineField({ name: "shippingHuf", title: "Szállítás (HUF)", type: "number" }),
     defineField({ name: "totalHuf", title: "Végösszeg (HUF)", type: "number" }),
-    defineField({ name: "stripeSessionId", title: "Stripe session ID", type: "string" }),
-    defineField({ name: "stripePaymentIntent", title: "Stripe payment intent", type: "string" }),
+    defineField({ name: "barionPaymentId", title: "Barion fizetés ID", type: "string" }),
+    defineField({ name: "barionStatus", title: "Barion státusz", type: "string" }),
+    defineField({
+      name: "stockReduced",
+      title: "Készlet csökkentve",
+      type: "boolean",
+      readOnly: true,
+      hidden: true,
+    }),
     defineField({
       name: "billingSame",
       title: "Számlázás = Szállítás?",

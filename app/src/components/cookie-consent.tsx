@@ -116,21 +116,16 @@ export function CookieConsent() {
         <div className="space-y-2">
           <div className="text-sm font-bold text-foreground">Sütibeállítások</div>
           <p className="text-xs text-muted-foreground">
-            Csak a működéshez szükséges sütiket használjuk alapból. Marketing / mérési sütiket (GTM,
-            Pixel) csak hozzájárulás után töltünk be. A döntést bármikor módosíthatod.
+            Csak a működéshez szükséges sütiket használjuk alapból. Marketing / mérési sütiket csak hozzájárulás után töltünk be. A döntést bármikor módosíthatod.
           </p>
           {showSettings && (
             <div className="space-y-2 rounded-xl border border-border bg-secondary/50 p-3">
               <div className="flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Szükséges sütik</span>
-                <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
-                  mindig aktív
-                </span>
               </div>
               <div className="flex items-center justify-between text-sm text-foreground">
                 <span>Marketing / mérés (GTM, Pixel)</span>
                 <label className="inline-flex cursor-pointer items-center gap-2 text-xs">
-                  <span>{marketing ? "Be" : "Ki"}</span>
                   <input
                     type="checkbox"
                     checked={marketing}

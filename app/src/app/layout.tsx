@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { BarionPixel } from "@/components/barion-pixel";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="hu" suppressHydrationWarning>
       <body className={`${manrope.variable} antialiased`}>
         <Providers>{children}</Providers>
+        <BarionPixel pixelId={process.env.NEXT_PUBLIC_BARION_PIXEL_ID} />
       </body>
     </html>
   );

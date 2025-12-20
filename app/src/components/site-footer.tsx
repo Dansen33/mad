@@ -119,13 +119,10 @@ export function SiteFooter() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} WELLCOMP. Minden jog fenntartva.</span>
-          <div className="flex gap-3">
-            <Link className="hover:text-foreground" href="/adatvedelem">
-              Adatvédelem
-            </Link>
-            <Link className="hover:text-foreground" href="/aszf">
-              ÁSZF
-            </Link>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-3">
+            <img src="/barionbannersm.png" alt="Barion" className="h-18 w-auto" />
+            </div>
           </div>
         </div>
       </div>

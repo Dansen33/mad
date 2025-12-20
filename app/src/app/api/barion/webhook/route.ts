@@ -20,23 +20,30 @@ export async function POST(req: Request) {
   if (!body) return NextResponse.json({ message: "Invalid body" }, { status: 400 });
 
   const status = body.Status || "";
-  const orderId = body.Transactions?.[0]?.POSTransactionId || "";
+    const orderId = body.Transactions?.[0]?.POSTransactionId || "";
 
-  if (!orderId) {
-    return NextResponse.json({ received: true });
-  }
+    if (!orderId) {
+      return NextResponse.json({ received: true });
+    }
 
   try {
     if (status === "Succeeded" || status === "Completed") {
       await sanityClient
         .patch(orderId)
-        .set({ status: "FIZETVE", barionPaymentId: body.PaymentId || "", updatedAt: new Date().toISOString() })
+        .set({
+          status: "FIZETVE",
+          barionPaymentId: body.PaymentId || "",
+          barionStatus: status,
+        })
         .commit();
       await reduceStockForOrder(orderId);
     } else if (status === "Canceled") {
       await sanityClient
         .patch(orderId)
-        .set({ status: "TOROLVE", updatedAt: new Date().toISOString() })
+        .set({
+          status: "TOROLVE",
+          barionStatus: status,
+        })
         .commit();
     }
   } catch (err) {

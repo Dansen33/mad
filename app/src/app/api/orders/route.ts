@@ -37,16 +37,16 @@ export async function POST(req: Request) {
     zip,
     city,
     address,
-    note,
-    shippingMethod,
-    paymentMethod,
-    items,
-    subtotalHuf,
-    shippingHuf,
-    totalHuf,
-    billingSame,
-    billing,
-  } = body;
+  note,
+  shippingMethod,
+  paymentMethod,
+  items,
+  subtotalHuf,
+  shippingHuf,
+  totalHuf,
+  billingSame,
+  billing,
+} = body;
 
   if (!email || !fullName || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -94,6 +94,13 @@ export async function POST(req: Request) {
           : `${it.slug || "item"}-${Date.now()}-${idx}`,
     }));
 
+    const paymentMethodMapped =
+      paymentMethod === "wire"
+        ? "Átutalás"
+        : paymentMethod === "cod"
+          ? "Utánvét"
+          : "Bankkártya";
+
     const docBody: {
       _type: "order";
       orderNumber: string;
@@ -131,7 +138,7 @@ export async function POST(req: Request) {
       address,
       note,
       shippingMethod,
-      paymentMethod,
+      paymentMethod: paymentMethodMapped,
       items: mappedItems,
       subtotalHuf,
       shippingHuf,
