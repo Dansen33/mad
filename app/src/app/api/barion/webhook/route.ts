@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sanityClient } from "@/lib/sanity";
+import { reduceStockForOrder } from "@/lib/order-stock";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
         .patch(orderId)
         .set({ status: "FIZETVE", barionPaymentId: body.PaymentId || "", updatedAt: new Date().toISOString() })
         .commit();
+      await reduceStockForOrder(orderId);
     } else if (status === "Canceled") {
       await sanityClient
         .patch(orderId)

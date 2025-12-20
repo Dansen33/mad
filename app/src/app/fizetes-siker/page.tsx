@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CartResetter } from "@/components/cart-resetter";
 
 export const dynamic = "force-dynamic";
@@ -17,18 +17,20 @@ export default function FizetesSiker() {
 
 function FizetesSikerContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const paymentId = searchParams?.get("paymentId") || "";
-  const [status, setStatus] = useState<"checking" | "ok" | "pending">(paymentId ? "checking" : "ok");
+  const [status, setStatus] = useState<"checking" | "ok" | "pending" | "failed">(
+    paymentId ? "checking" : "ok",
+  );
 
   useEffect(() => {
     let cancelled = false;
+    let timeoutId: NodeJS.Timeout | null = null;
     let attempts = 0;
     const checkStatus = async () => {
       if (!paymentId) return;
       try {
-        const res = await fetch(`/api/barion/status?paymentId=${encodeURIComponent(paymentId)}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(`/api/barion/state?paymentId=${encodeURIComponent(paymentId)}`, { cache: "no-store" });
         const data = await res.json();
         if (cancelled) return;
         if (res.ok && data?.status === "FIZETVE") {
@@ -37,20 +39,23 @@ function FizetesSikerContent() {
         }
         attempts += 1;
         if (attempts < 6) {
-          setTimeout(checkStatus, 1500);
+          timeoutId = setTimeout(checkStatus, 1500);
           return;
         }
-        setStatus("pending"); // nem kaptunk visszaigazolást, de nem tereljük hibára
+        setStatus("failed");
+        router.replace("/fizetes-hiba");
       } catch {
         if (cancelled) return;
-        setStatus("pending");
+        setStatus("failed");
+        router.replace("/fizetes-hiba");
       }
     };
     if (paymentId) checkStatus();
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [paymentId]);
+  }, [paymentId, router]);
 
   if (status === "checking") {
     return (
