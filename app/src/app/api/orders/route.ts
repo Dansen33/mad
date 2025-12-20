@@ -53,18 +53,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Rendelésszám generálás: YYYY + 5 jegyű növekvő sorszám
+    // Rendelésszám: CMP-ÉV-SORSZÁM (sorszám min. 125-ről indul, évenként újraindul)
     const year = new Date().getFullYear();
-    const prefix = `${year}`;
+    const prefix = `CMP-${year}-`;
     const last = await sanityClient.fetch(
       `*[_type=="order" && defined(orderNumber) && orderNumber match $prefixMatch]|order(orderNumber desc)[0]{orderNumber}`,
       { prefixMatch: `${prefix}*` },
     );
     const lastSeq =
       last && typeof last.orderNumber === "string" && last.orderNumber.startsWith(prefix)
-        ? Number(last.orderNumber.slice(prefix.length)) || 0
+        ? Number((last.orderNumber as string).split("-").pop()) || 0
         : 0;
-    const nextSeq = lastSeq + 1;
+    const base = Math.max(124, lastSeq); // első legyen 125
+    const nextSeq = base + 1;
     const orderNumber = `${prefix}${String(nextSeq).padStart(5, "0")}`;
 
     const mappedItems: OrderItemInput[] = items.map((it: OrderItemInput, idx: number) => ({
