@@ -92,15 +92,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Barion callback URL hiányzik" }, { status: 500 });
   }
 
-  console.log("Barion Payment/Start init", {
-    env,
-    orderId,
-    orderNumber,
-    paymentRequestId: payload.PaymentRequestId,
-    callbackUrl,
-    total: requestedTotal,
-  });
-
   const payload = {
     POSKey: posKey,
     PaymentType: "Immediate",
@@ -122,6 +113,15 @@ export async function POST(req: Request) {
       },
     ],
   };
+
+  console.log("Barion Payment/Start init", {
+    env,
+    orderId,
+    orderNumber,
+    paymentRequestId: payload.PaymentRequestId,
+    callbackUrl,
+    total: requestedTotal,
+  });
 
   try {
     // Barion sandbox/prod: v2 endpoint /Payment/Start
