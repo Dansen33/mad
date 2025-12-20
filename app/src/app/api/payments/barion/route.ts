@@ -64,6 +64,11 @@ export async function POST(req: Request) {
   const totalWithDiscount = money(Math.max(0, itemsTotal - Math.max(0, discountHuf)));
   const requestedTotal = totalHuf > 0 ? money(totalHuf) : totalWithDiscount;
 
+  const callbackUrl =
+    typeof process.env.BARION_CALLBACK_URL === "string" && process.env.BARION_CALLBACK_URL
+      ? process.env.BARION_CALLBACK_URL
+      : `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/barion/webhook`;
+
   const payload = {
     POSKey: posKey,
     PaymentType: "Immediate",
@@ -75,7 +80,7 @@ export async function POST(req: Request) {
     Locale: "hu-HU",
     Currency: "HUF",
     RedirectUrl: successUrl || `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/fizetes-siker`,
-    CallbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/barion/webhook`,
+    CallbackUrl: callbackUrl,
     Transactions: [
       {
         POSTransactionId: orderId || orderNumber || `pos-${Date.now()}`,
