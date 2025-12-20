@@ -136,6 +136,7 @@ async function handleWebhook(req: Request) {
     }
 
     const success = isSuccessStatus(status) || isSuccessStatus(txStatus);
+    console.log("Barion webhook resolved state", { paymentId, orderId, status, txStatus, success });
 
     if (orderId) {
       try {
