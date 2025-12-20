@@ -23,18 +23,6 @@ type BillingInput = {
 
 export const dynamic = "force-dynamic";
 
-function parseList(value: string | undefined | null) {
-  return (value || "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
-function formatHuf(amount?: number) {
-  if (!Number.isFinite(amount)) return "-";
-  return `${Math.round(amount!).toLocaleString("hu-HU")} Ft`;
-}
-
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ message: "Invalid body" }, { status: 400 });

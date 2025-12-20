@@ -31,7 +31,6 @@ export async function POST(req: Request) {
   const orderNumber = typeof body.orderNumber === "string" ? body.orderNumber : "";
   const email = typeof body.email === "string" ? body.email : "";
   const successUrl = typeof body.successUrl === "string" ? body.successUrl : "";
-  const cancelUrl = typeof body.cancelUrl === "string" ? body.cancelUrl : "";
   const itemsInput = Array.isArray(body.items) ? (body.items as Item[]) : [];
   const shippingHuf = Number(body.shippingHuf) || 0;
   const discountHuf = Number(body.discountHuf) || 0;

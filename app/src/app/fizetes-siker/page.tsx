@@ -1,15 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CartResetter } from "@/components/cart-resetter";
 
 export const dynamic = "force-dynamic";
 
 export default function FizetesSiker() {
+  return (
+    <Suspense fallback={null}>
+      <FizetesSikerContent />
+    </Suspense>
+  );
+}
+
+function FizetesSikerContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const paymentId = searchParams?.get("paymentId") || "";
   const [status, setStatus] = useState<"checking" | "ok" | "pending">(paymentId ? "checking" : "ok");
 
