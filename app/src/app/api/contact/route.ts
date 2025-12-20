@@ -48,7 +48,7 @@ export async function POST(req: Request) {
   `;
 
   try {
-    await fetch("https://api.resend.com/emails", {
+    const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,9 +62,12 @@ export async function POST(req: Request) {
         reply_to: [email],
       }),
     });
+    if (!resendRes.ok) {
+      const text = await resendRes.text().catch(() => "");
+      console.error("Contact email Resend hiba", resendRes.status, text);
+    }
   } catch (err) {
     console.error("Contact email küldés hiba", err);
-    return NextResponse.json({ message: "Nem sikerült elküldeni az üzenetet" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
