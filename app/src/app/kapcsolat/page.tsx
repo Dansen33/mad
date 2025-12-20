@@ -89,14 +89,17 @@ export default function KapcsolatPage() {
             </div>
           </div>
           <a
-            href="mailto:info@wellcomp.hu"
+            href="#contact-form"
             className="inline-flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
           >
             Ajánlatkérés küldése
           </a>
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-lg shadow-black/30">
+        <div
+          id="contact-form"
+          className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-lg shadow-black/30"
+        >
           <div className="text-xs uppercase text-primary">Írj nekünk</div>
           <h2 className="text-2xl font-extrabold leading-tight">Kapcsolatfelvételi űrlap</h2>
           <p className="text-sm text-muted-foreground">
