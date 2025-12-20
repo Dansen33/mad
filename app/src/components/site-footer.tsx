@@ -25,12 +25,12 @@ export function SiteFooter() {
             >
               📞 +36 70 317 6680
             </a>
-            <a
-              href="mailto:info@wellcomp.hu"
+            <Link
+              href="/kapcsolat#contact-form"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-primary/30 shadow-lg"
             >
-              ✉️ info@wellcomp.hu
-            </a>
+              ✉️ Kapcsolat űrlap
+            </Link>
           </div>
         </div>
 
