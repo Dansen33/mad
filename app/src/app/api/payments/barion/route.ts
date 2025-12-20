@@ -48,27 +48,49 @@ export async function POST(req: Request) {
       UnitPrice: money(Number(it.priceHuf) || 0),
       ItemTotal: money((Number(it.priceHuf) || 0) * Math.max(1, Number(it.quantity) || 1)),
     }))
-    .filter((it) => it.UnitPrice >= 0 && it.Quantity > 0);
+    .filter((it) => it.UnitPrice > 0 && it.Quantity > 0);
 
+  let itemsTotal = items.reduce((sum, it) => sum + it.ItemTotal, 0);
   if (shippingHuf > 0) {
+    const shipTotal = money(shippingHuf);
     items.push({
       Name: "Szállítás",
       Description: "",
       Quantity: 1,
       Unit: "szállítás",
-      UnitPrice: money(shippingHuf),
-      ItemTotal: money(shippingHuf),
+      UnitPrice: shipTotal,
+      ItemTotal: shipTotal,
+    });
+    itemsTotal += shipTotal;
+  }
+
+  const discountApplied = Math.min(Math.max(0, money(discountHuf)), itemsTotal);
+  if (discountApplied > 0) {
+    const disc = money(-discountApplied);
+    items.push({
+      Name: "Kedvezmény",
+      Description: "Kupon / akció",
+      Quantity: 1,
+      Unit: "kedvezmény",
+      UnitPrice: disc,
+      ItemTotal: disc,
     });
   }
 
-  const itemsTotal = items.reduce((sum, it) => sum + it.ItemTotal, 0);
-  const totalWithDiscount = money(Math.max(0, itemsTotal - Math.max(0, discountHuf)));
+  const totalWithDiscount = money(Math.max(0, itemsTotal - discountApplied));
   const requestedTotal = totalHuf > 0 ? money(totalHuf) : totalWithDiscount;
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    (env === "sandbox" ? "http://localhost:3000" : "");
   const callbackUrl =
-    typeof process.env.BARION_CALLBACK_URL === "string" && process.env.BARION_CALLBACK_URL
-      ? process.env.BARION_CALLBACK_URL
-      : `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/barion/webhook`;
+    (typeof process.env.BARION_CALLBACK_URL === "string" && process.env.BARION_CALLBACK_URL) ||
+    (siteUrl ? `${siteUrl}/api/barion/webhook` : "");
+  if (!callbackUrl) {
+    console.error("Barion start hiba: CallbackUrl nincs beállítva");
+    return NextResponse.json({ message: "Barion callback URL hiányzik" }, { status: 500 });
+  }
 
   const payload = {
     POSKey: posKey,
