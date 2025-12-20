@@ -109,9 +109,9 @@ export function SiteFooter() {
               <a className="hover:text-foreground" href="tel:+36703176680">
                 +36 70 317 6680
               </a>
-              <a className="hover:text-foreground" href="mailto:info@wellcomp.hu">
-                info@wellcomp.hu
-              </a>
+              <Link className="hover:text-foreground" href="/kapcsolat#contact-form">
+                Kapcsolat űrlap
+              </Link>
               <p className="text-foreground">H-P: 8:00 - 17:00</p>
             </div>
           </div>

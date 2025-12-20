@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "Bevizsgált, prémium PC, Laptop, telefon webshopok vállalkozásoknak és magánszemélyeknek. Gyors szállítás, garancia, business support.",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
