@@ -15,9 +15,10 @@ export default function KapcsolatPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formEl = e.currentTarget;
     setStatus("loading");
     setErrorMsg(null);
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(formEl);
     const payload = {
       name: (form.get("name") as string | null) ?? "",
       email: (form.get("email") as string | null) ?? "",
@@ -38,7 +39,7 @@ export default function KapcsolatPage() {
         return;
       }
       setStatus("success");
-      e.currentTarget.reset();
+      formEl.reset();
     } catch (err) {
       console.error("Contact form error", err);
       setErrorMsg("Nem sikerült elküldeni az üzenetet.");
