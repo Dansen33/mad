@@ -114,6 +114,14 @@ async function handleWebhook(req: Request) {
   let txStatus = body.Transactions?.[0]?.Status || "";
   let orderId = body.Transactions?.[0]?.POSTransactionId || "";
 
+  console.log("Barion webhook received", {
+    paymentId,
+    status,
+    txStatus,
+    orderId,
+    query: { paymentId: queryPaymentId, status: queryStatus, orderId: queryOrderId },
+  });
+
   // respond immediately; do the heavy lifting in the background
   void (async () => {
     if ((!orderId || !status) && paymentId) {

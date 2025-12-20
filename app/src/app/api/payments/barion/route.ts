@@ -10,7 +10,7 @@ type Item = {
 };
 
 function money(v: number) {
-  return Math.max(0, Math.round(v * 100) / 100); // Barion HUF érték, 2 tizedes
+  return Math.round(v * 100) / 100; // Barion HUF érték, 2 tizedes, előjellel
 }
 
 export async function POST(req: Request) {
@@ -91,6 +91,15 @@ export async function POST(req: Request) {
     console.error("Barion start hiba: CallbackUrl nincs beállítva");
     return NextResponse.json({ message: "Barion callback URL hiányzik" }, { status: 500 });
   }
+
+  console.log("Barion Payment/Start init", {
+    env,
+    orderId,
+    orderNumber,
+    paymentRequestId: payload.PaymentRequestId,
+    callbackUrl,
+    total: requestedTotal,
+  });
 
   const payload = {
     POSKey: posKey,
