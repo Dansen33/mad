@@ -6,11 +6,18 @@ export async function reduceStockForOrder(orderId: string) {
   if (!orderId) return;
   try {
     const order = await sanityClient.fetch(
-      `*[_type=="order" && _id==$id][0]{items[]{slug,quantity},stockReduced}`,
+      `*[_type=="order" && _id==$id][0]{items[]{slug,quantity},stockReduced,status}`,
       { id: orderId },
     );
     if (!order) return;
-    if (order.stockReduced === true) return;
+    if (order.stockReduced === true) {
+      console.warn("Stock already reduced, skipping", { orderId });
+      return;
+    }
+    if (order.status && order.status !== "FIZETVE") {
+      console.warn("Stock reduce skipped, order not paid", { orderId, status: order.status });
+      return;
+    }
 
     const items: OrderItem[] = Array.isArray(order.items) ? order.items : [];
     const qtyBySlug = items.reduce<Record<string, number>>((acc, it) => {

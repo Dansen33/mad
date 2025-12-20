@@ -17,6 +17,7 @@ type SaleHit = {
   priceHuf?: number;
   compareAtHuf?: number;
   finalPriceHuf?: number;
+  discountHuf?: number;
   invalidDiscount?: boolean;
   discounts?: { type?: string; amount?: number }[];
   final?: number;
@@ -90,21 +91,45 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
   );
 
   const discounted = items.map((item) => {
-    const base = typeof item.priceHuf === "number" ? item.priceHuf : 0;
-    const finalFromQuery =
-      typeof item.finalPriceHuf === "number" && !item.invalidDiscount ? item.finalPriceHuf : undefined;
-    const compareAtFromQuery = typeof item.compareAtHuf === "number" ? item.compareAtHuf : base;
-    const final = Math.max(0, finalFromQuery ?? base);
-    const compareAt = Math.max(compareAtFromQuery, base);
-    const hasDiscount =
-      !item.invalidDiscount &&
-      typeof final === "number" &&
-      typeof compareAt === "number" &&
-      compareAt > final;
+    const basePrice = typeof item.priceHuf === "number" ? item.priceHuf : undefined;
+    const discounts = Array.isArray(item.discounts) ? item.discounts : [];
+    const bestDiscount =
+      basePrice && discounts.length
+        ? discounts
+            .map((d) => {
+              if (!d || typeof d.amount !== "number") return 0;
+              if (d.type === "percent") return Math.round(basePrice * d.amount * 0.01);
+              if (d.type === "fixed") return d.amount;
+              return 0;
+            })
+            .filter((v) => v > 0)
+            .sort((a, b) => b - a)[0] ?? 0
+        : Math.max(0, Number(item.discountHuf) || 0);
+
+    const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
+    const invalidDiscount =
+      (typeof computedFinal === "number" && computedFinal < 0) || item.invalidDiscount || false;
+    const final =
+      !invalidDiscount && typeof computedFinal === "number"
+        ? computedFinal
+        : typeof item.finalPriceHuf === "number"
+          ? item.finalPriceHuf
+          : basePrice ?? 0;
+
+    const compareAt =
+      !invalidDiscount && typeof final === "number" && bestDiscount > 0 && typeof basePrice === "number"
+        ? basePrice
+        : typeof item.compareAtHuf === "number" && typeof final === "number" && item.compareAtHuf > final
+          ? item.compareAtHuf
+          : undefined;
+    const hasDiscount = compareAt !== undefined && typeof final === "number" && compareAt > final;
+
     return { ...item, final, compareAt, hasDiscount };
   });
 
-  const filtered = discounted.filter((item) => {
+  const discountedOnly = discounted.filter((item) => item.hasDiscount);
+
+  const filtered = discountedOnly.filter((item) => {
     if (type && item._type !== type) return false;
     if (brand && item.brand && item.brand.toLowerCase() !== brand.toLowerCase()) return false;
     const specs = item.specs || {};
@@ -155,10 +180,10 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
   };
 
   const facets = {
-    all: buildFacets(discounted),
-    product: buildFacets(discounted.filter((x) => x._type === "product")),
-    pc: buildFacets(discounted.filter((x) => x._type === "pc")),
-    phone: buildFacets(discounted.filter((x) => x._type === "phone")),
+    all: buildFacets(discountedOnly),
+    product: buildFacets(discountedOnly.filter((x) => x._type === "product")),
+    pc: buildFacets(discountedOnly.filter((x) => x._type === "pc")),
+    phone: buildFacets(discountedOnly.filter((x) => x._type === "phone")),
   };
 
   const filterKey = [sort, brand, type, soc, cpu, memory, gpu, storage, display, priceMax ?? ""].join("|");
@@ -182,17 +207,17 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
         </div>
 
         <div className="rounded-2xl border border-border bg-card px-4 py-3 shadow-lg shadow-black/30">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="text-xs uppercase text-primary">Akciók</div>
-              <h1 className="text-2xl font-extrabold">Akciós termékek</h1>
-              <p className="text-sm text-muted-foreground">
-                Minden kedvezményes laptop, PC és telefon egy helyen.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase text-primary">Akciók</div>
+                <h1 className="text-2xl font-extrabold">Akciós termékek</h1>
+                <p className="text-sm text-muted-foreground">
+                  Minden kedvezményes laptop, PC és telefon egy helyen.
+                </p>
+              </div>
+              <div className="text-xs font-semibold text-muted-foreground">{discountedOnly.length} találat</div>
             </div>
-            <div className="text-xs font-semibold text-muted-foreground">{discounted.length} találat</div>
           </div>
-        </div>
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="w-full lg:hidden">
@@ -270,10 +295,16 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
                       {item.name}
                     </Link>
                     <div className="flex flex-col items-start gap-1">
-                      <span className="text-sm font-semibold text-muted-foreground line-through">
-                        {formatPrice(item.compareAt)}
-                      </span>
-                      <span className="text-2xl font-extrabold text-primary">
+                      {typeof item.compareAt === "number" && (
+                        <span className="text-sm font-semibold text-muted-foreground line-through">
+                          {formatPrice(item.compareAt)}
+                        </span>
+                      )}
+                      <span
+                        className={`text-2xl font-extrabold ${
+                          typeof item.compareAt === "number" ? "text-primary" : "text-foreground"
+                        }`}
+                      >
                         {formatPrice(item.final)}
                       </span>
                     </div>
@@ -287,7 +318,7 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
                 </div>
               );
             })}
-            {discounted.length === 0 && (
+            {sorted.length === 0 && (
               <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
                 Jelenleg nincs akciós termék.
               </div>

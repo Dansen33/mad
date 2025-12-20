@@ -78,7 +78,14 @@ export async function POST(req: Request) {
   }
 
   const totalWithDiscount = money(Math.max(0, itemsTotal - discountApplied));
-  const requestedTotal = totalHuf > 0 ? money(totalHuf) : totalWithDiscount;
+  const requestedTotal = totalWithDiscount;
+  if (totalHuf > 0 && Math.abs(totalHuf - totalWithDiscount) > 1) {
+    console.warn("Barion total mismatch (client vs server)", {
+      clientTotal: totalHuf,
+      serverTotal: totalWithDiscount,
+      diff: totalHuf - totalWithDiscount,
+    });
+  }
 
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
