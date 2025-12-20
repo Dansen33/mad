@@ -43,7 +43,7 @@ amelyről az 1. pontban olvashat.
         Nem számít bele a jótállási időbe a kijavítási időnek az a része, amely alatt a fogyasztó a terméket nem tudja rendeltetésszerűen használni, tehát a garanciális ügyintézés során Cégünknél töltött idővel
         meghosszabbodik a garancia határideje. A jótállási idő újraindul, ha a terméket Cégünk kicseréli.
       </p>
-      <p>
+
 <h3 className="text-xl font-semibold">Limitált garancia – kopóalkatrészek és természetes elhasználódás</h3>
 
 <p>
@@ -143,7 +143,7 @@ amelyről az 1. pontban olvashat.
     <section className="space-y-4">
       <h2 className="text-2xl font-semibold">Garanciális készülék csomagolása és postázása</h2>
       <p>
-        Ha nem tudja személyesen bevinni a boltba a garanciális problémával rendelkező készüléket, első lépésben érdemes elérhetőségünkön (email: info@wellcomp.hu, tel.: 06-30-317-66-80)
+        Ha nem tudja személyesen bevinni az irodába a garanciális problémával rendelkező készüléket, első lépésben érdemes elérhetőségünkön (email: info@wellcomp.hu, tel.: 06-70-317-66-80)
         érdeklődni, hogy garanciális-e a probléma. Amennyiben igen, kérjük írja le a problémát pontosan email címünkre, majd kérjük, postai úton jutassa el nekünk a készüléket.
       </p>
       <p>
