@@ -14,11 +14,11 @@ const faqs = [
   },
   {
     q: "Mennyi garanciát adtok?",
-    a: "Használt termékekre is 24 hónap garanciát vállalunk; a pontos feltételek és kivételek a Garancia oldalon vannak részletezve.\n• 24 hónap garancia használt termékekre is\n• A kivételek és részletek a Garancia oldalon találhatók",
+    a: "Használt termékekre is 24 hónap garanciát vállalunk; a pontos feltételek és kivételek a Garancia oldalon vannak részletezve.\n• 24 hónap limitált garancia használt termékekre is\n• A kivételek és részletek a Garancia oldalon találhatók",
   },
   {
     q: "Mire nem vonatkozik a garancia?",
-    a: "A kizárt eseteket a Garancia oldalon soroljuk fel: tipikusan rendeltetésellenes használatból eredő hibák, sérülések vagy fogyó alkatrészek.\n• A pontos lista a Garancia oldalon olvasható\n• Terméktípustól függően eltérhet",
+    a: "A kizárt eseteket a Garancia oldalon soroljuk fel: tipikusan rendeltetésellenes használatból eredő hibák, sérülések vagy fogyó és kopó alkatrészek.\n• A pontos lista a Garancia oldalon olvasható\n• Terméktípustól függően eltérhet",
   },
   {
     q: "Hogyan intézzem a garanciát, ha gond van?",

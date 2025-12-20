@@ -44,7 +44,7 @@ export default function RolunkPage() {
           <ul className="list-disc space-y-2 pl-5 text-foreground">
             <li>Ár–érték fókusz: a cél, hogy a pénzed a teljesítményre menjen, ne a marketingre.</li>
             <li>Minőség és megbízhatóság: nem csak eladunk, hanem felelősséget vállalunk.</li>
-            <li>24 hónap garancia használt termékekre is: ez nálunk alap, nem extra.</li>
+            <li>24 hónap limitált garancia használt termékekre is: ez nálunk alap, nem extra.</li>
             <li>Gyors ügyintézés: igyekszünk a lehető leggyorsabban dolgozni, és ha valami bonyolultabb, akkor is végigvisszük – nálunk a „nem adjuk fel” tényleg elv.</li>
           </ul>
         </section>

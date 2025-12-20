@@ -124,7 +124,7 @@ export function CookieConsent() {
                 <span>Szükséges sütik</span>
               </div>
               <div className="flex items-center justify-between text-sm text-foreground">
-                <span>Marketing / mérés (GTM, Pixel)</span>
+                <span>Marketing / mérés (GTM, Pixel, Barion Pixel)</span>
                 <label className="inline-flex cursor-pointer items-center gap-2 text-xs">
                   <input
                     type="checkbox"

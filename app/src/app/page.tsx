@@ -128,7 +128,7 @@ const faqs = [
   },
   {
     q: "Mennyi garanciát adtok?",
-    a: "Használt termékekre is 24 hónap garanciát vállalunk; a pontos feltételek és kivételek a Garancia oldalon vannak részletezve.\n• 24 hónap garancia használt termékekre is\n• A kivételek és részletek a Garancia oldalon találhatók",
+    a: "Használt termékekre is 24 hónap garanciát vállalunk; a pontos feltételek és kivételek a Garancia oldalon vannak részletezve.\n• 24 hónap limitált garancia használt termékekre is\n• A kivételek és részletek a Garancia oldalon találhatók",
   },
   {
     q: "Van-e elállás / visszaküldés?",
@@ -429,7 +429,7 @@ export default function Home() {
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
                   "24-48 órás szállítás",
-                  "2 év garancia felújított termékekre is",
+                  "2 év limitált garancia felújított termékekre is",
                   "Kiváló minőségű termékek",
                 ].map((pill) => (
                   <span

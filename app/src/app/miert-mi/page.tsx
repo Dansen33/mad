@@ -7,8 +7,8 @@ export const revalidate = 0;
 
 const highlights = [
   {
-    title: "24 hónap garancia – használt termékre is",
-    desc: "A használt nálunk nem kockázat, hanem tudatos döntés. 2 év garanciát vállalunk, a kivételek pedig mindig átláthatóan a Garancia oldalunkon vannak feltüntetve.",
+    title: "24 hónap limitált garancia – használt termékre is",
+    desc: "A használt nálunk nem kockázat, hanem tudatos döntés. 2 év limitált garanciát vállalunk, a kivételek pedig mindig átláthatóan a Garancia oldalunkon vannak feltüntetve.",
     bullets: [
       "Garanciális esetek, kivételek egyértelműen dokumentáltak.",
       "Nincs apróbetű – csak tiszta ígéret.",

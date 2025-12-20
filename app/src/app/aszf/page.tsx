@@ -224,7 +224,7 @@ export default function AszfPage() {
               A fogyasztó jogosult az ellenszolgáltatás részbeni vagy teljes visszatartására is, amennyiben a vállalkozás nem teljesít szerződésszerűen.
             </p>
             <p>
-              Kellékszavatossági igényt a hibának a felismeréstől számított 2 hónapon belül kell jelezni; a szerződés teljesítésétől számított 2 év (használt termékeknél 1 év) alatt érvényesíthető. Digitális tartalom esetén a hiba a teljesítés időpontjától számított két éven belül következik be.
+              Kellékszavatossági igényt a hibának a felismeréstől számított 2 hónapon belül kell jelezni; a szerződés teljesítésétől számított 2 év (felújtított termékekre limitált) alatt érvényesíthető. Digitális tartalom esetén a hiba a teljesítés időpontjától számított két éven belül következik be.
             </p>
             <p>
               A fogyasztónak az áru kijavítása vagy cseréje érdekében a vállalkozás rendelkezésére kell bocsátania a hibás terméket, és a kicserélt termék visszavételét a vállalkozás költségére kell biztosítania.

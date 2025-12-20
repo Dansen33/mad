@@ -14,7 +14,7 @@ export function SiteFooter() {
               <div className="text-xs uppercase tracking-wide text-primary">WELLCOMP</div>
               <div className="text-xl font-extrabold">Segítünk választani</div>
               <p className="text-sm text-muted-foreground">
-                Business support, gyors szállítás, 12 hó garancia.
+                Profi tanácsadás és ügyfélszolgálat vásárlás előtt és után is.
               </p>
             </div>
           </div>

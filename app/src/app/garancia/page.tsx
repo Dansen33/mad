@@ -44,13 +44,45 @@ amelyről az 1. pontban olvashat.
         meghosszabbodik a garancia határideje. A jótállási idő újraindul, ha a terméket Cégünk kicseréli.
       </p>
       <p>
-        A garancia teljes körű, a következő kivételekkel:
-      </p>
-      <ul className="list-disc space-y-1 pl-6">
-        <li>Az akkumulátorra azonosítási problémák miatt nem vonatkozik.</li>
-        <li>Pixelhibára az ISO 13406-2 szabvány alapján ad garanciát az eladó.</li>
-        <li>A laptophoz tartozó tápegységekre 1 hónap garancia érvényes.</li>
-      </ul>
+<h3 className="text-xl font-semibold">Limitált garancia – kopóalkatrészek és természetes elhasználódás</h3>
+
+<p>
+  A garancia a rendeltetésszerű használat mellett bekövetkező, nem kopás jellegű hardverhibákra terjed ki.
+  Felújított eszközöknél bizonyos alkatrészek természetes elhasználódása várható; ezekre (illetve az ebből eredő jelenségekre)
+  a garancia nem vonatkozik.
+</p>
+
+<ul className="list-disc space-y-1 pl-6">
+  <li><strong>Akkumulátor</strong> (kapacitáscsökkenés, üzemidő romlás, cella elöregedés, felpuffadás).</li>
+  <li><strong>Billentyűzet</strong> (kopás, kifényesedés, felirat kopása, “lágyuló”/szivacsos érzet).</li>
+  <li><strong>Érintőpad</strong> (kopás, felület elhasználódása, mechanikus kattintás romlása).</li>
+  <li><strong>Kijelző háttérvilágítás</strong> (fényerő csökkenés, egyenetlenség, bevilágítás jellegű jelenségek).</li>
+  <li><strong>Csatlakozók / aljzatok</strong> (USB/USB-C, töltőcsatlakozó, audio, HDMI/DP stb. kontakt-kopás, kilazulás, mechanikai sérülés).</li>
+  <li><strong>Zsanérok</strong> (lazulás/szorulás, mechanikai kopás).</li>
+  <li><strong>Ventilátor</strong> (zajosodás, csapágykopás), illetve a porosodásból eredő hűtési problémák.</li>
+
+  <li><strong>Gombok és mechanikus kezelőszervek</strong> (bekapcsológomb, hangerőgomb, fedélzár, kártyatálca/sim tálca).</li>
+  <li><strong>Hangszóró / mikrofon</strong> (szennyeződés, eltömődés, mechanikai igénybevétel miatti minőségromlás).</li>
+
+  <li><strong>PC/asztali gép esetén</strong>: ház- és hűtőventilátorok, előlapi csatlakozók és kábelek (front I/O), mechanikus kapcsolók,
+      porosodásból eredő hőfok-/stabilitásproblémák.</li>
+
+  <li><strong>Telefon/handheld eszköz esetén</strong>: töltőport mechanikai kopása/oxidációja, csatlakozók, gombok,
+      hangszóró/mikrofon szennyeződésből eredő hibái, kijelzőn karc/ütés/repedés, kameramodul karcolódás.</li>
+</ul>
+
+<p>
+  <strong>Pixelhiba:</strong> pixelhibára az ISO 13406-2 szabvány figyelembevételével jár el az eladó.
+</p>
+
+<p>
+  <strong>Tápegység / töltő:</strong> a laptophoz tartozó tápegységre (töltőre) 1 hónap garancia érvényes.
+</p>
+
+<p className="text-sm text-muted-foreground">
+  A fenti korlátozások a természetes elhasználódásra és a mechanikai/használati eredetű meghibásodásokra vonatkoznak.
+  A jótállás nem érinti a fogyasztót megillető, jogszabályban rögzített kellékszavatossági jogokat.
+</p>
       <p>
         A készülék üzembe helyezése és beállítása nem tartozik a jótállási javítási kötelezettségek körébe (például operációs rendszer telepítése), ezt az ügyfél megrendelésére
         a szerviz külön díjtétel felszámítás ellenében vállalja.
