@@ -20,7 +20,7 @@ export function SiteFooter() {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              href="tel:+36301234567"
+              href="tel:+36703176680"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold shadow-sm hover:border-primary/60"
             >
               📞 +36 70 317 6680
@@ -106,13 +106,13 @@ export function SiteFooter() {
               Elérhetőségek
             </h3>
             <div className="grid gap-2 text-sm text-muted-foreground">
-              <a className="hover:text-foreground" href="tel:+36301234567">
+              <a className="hover:text-foreground" href="tel:+36703176680">
                 +36 70 317 6680
               </a>
               <a className="hover:text-foreground" href="mailto:info@wellcomp.hu">
                 info@wellcomp.hu
               </a>
-              <p className="text-foreground">H-P: 9:00 - 18:00</p>
+              <p className="text-foreground">H-P: 8:00 - 17:00</p>
             </div>
           </div>
         </div>

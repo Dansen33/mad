@@ -1,11 +1,51 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+
+type Status = "idle" | "loading" | "success" | "error";
 
 export default function KapcsolatPage() {
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMsg(null);
+    const form = new FormData(e.currentTarget);
+    const payload = {
+      name: (form.get("name") as string | null) ?? "",
+      email: (form.get("email") as string | null) ?? "",
+      phone: (form.get("phone") as string | null) ?? "",
+      topic: (form.get("topic") as string | null) ?? "",
+      message: (form.get("message") as string | null) ?? "",
+    };
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrorMsg((data?.message as string) || "Nem sikerült elküldeni az üzenetet.");
+        setStatus("error");
+        return;
+      }
+      setStatus("success");
+      e.currentTarget.reset();
+    } catch (err) {
+      console.error("Contact form error", err);
+      setErrorMsg("Nem sikerült elküldeni az üzenetet.");
+      setStatus("error");
+    }
+  };
+
   return (
     <div className="min-h-screen text-foreground">
       <ProductHeader />
@@ -22,12 +62,12 @@ export default function KapcsolatPage() {
           <div className="text-xs uppercase text-primary">Elérhetőségek</div>
           <h1 className="text-3xl font-extrabold leading-tight">Kapcsolat</h1>
           <p className="text-sm text-muted-foreground">
-            Kérdésed van? Hívj, írj, vagy kérj ajánlatot. Ügyfélszolgálat: H-P 9:00-18:00.
+            Kérdésed van? Hívj, írj, vagy kérj ajánlatot. Ügyfélszolgálat: H-P 8:00-17:00.
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-secondary p-4">
               <h3 className="text-sm font-semibold text-foreground">Telefon</h3>
-              <a className="text-sm text-primary" href="tel:+36301234567">
+              <a className="text-sm text-primary" href="tel:+36703176680">
                 +36 70 317 6680
               </a>
             </div>
@@ -45,7 +85,7 @@ export default function KapcsolatPage() {
             </div>
             <div className="rounded-xl border border-border bg-secondary p-4">
               <h3 className="text-sm font-semibold text-foreground">Nyitvatartás</h3>
-              <p className="text-sm text-muted-foreground">Hétfő - Péntek: 9:00 - 18:00</p>
+              <p className="text-sm text-muted-foreground">Hétfő - Péntek: 8:00 - 17:00</p>
             </div>
           </div>
           <a
@@ -62,12 +102,7 @@ export default function KapcsolatPage() {
           <p className="text-sm text-muted-foreground">
             Add meg az elérhetőségeid és az üzeneted, munkatársunk hamarosan válaszol.
           </p>
-          <form
-            className="grid grid-cols-1 gap-4 md:grid-cols-2"
-            method="post"
-            action="mailto:info@wellcomp.hu"
-            encType="text/plain"
-          >
+          <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-1 text-sm text-foreground">
               Név *
               <input
@@ -93,7 +128,7 @@ export default function KapcsolatPage() {
                 type="tel"
                 name="phone"
                 className="rounded-xl border border-border bg-secondary px-3 py-2 text-sm focus:outline-none"
-                placeholder="+36 70 ..."
+                placeholder="+36 12 ..."
               />
             </label>
             <label className="flex flex-col gap-1 text-sm text-foreground">
@@ -114,15 +149,24 @@ export default function KapcsolatPage() {
                 placeholder="Írd le, miben segíthetünk (termék, kategória, mennyiség, határidő)."
               />
             </label>
+            {status === "success" && (
+              <div className="md:col-span-2 rounded-lg bg-green-100 px-3 py-2 text-sm text-green-700">
+                Köszönjük, üzeneted megkaptuk. Hamarosan jelentkezünk.
+              </div>
+            )}
+            {status === "error" && errorMsg && (
+              <div className="md:col-span-2 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700">
+                {errorMsg}
+              </div>
+            )}
             <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">
-                * Kötelező mezők
-              </p>
+              <p className="text-xs text-muted-foreground">* Kötelező mezők</p>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
+                disabled={status === "loading"}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 disabled:opacity-70"
               >
-                Üzenet küldése
+                {status === "loading" ? "Küldés..." : "Üzenet küldése"}
               </button>
             </div>
           </form>

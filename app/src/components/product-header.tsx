@@ -609,7 +609,7 @@ export function ProductHeader() {
               Profil
             </Link>
             <Link
-              href="tel:+36301234567"
+              href="tel:+36703176680"
               className="whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
             >
               +36 70 317 6680
@@ -617,7 +617,7 @@ export function ProductHeader() {
           </div>
 
           <Link
-            href="tel:+36301234567"
+            href="tel:+36703176680"
             className={`flex items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 md:hidden ${
               openDropdown ? "hidden" : ""
             }`}

@@ -66,7 +66,7 @@ function BejelentkezesContent() {
         <div className="text-center">
           <h1 className="text-2xl font-extrabold">Bejelentkezés</h1>
           <p className="text-sm text-muted-foreground">
-            Jelentkezz be email és jelszóval, vagy használd a Google / Apple fiókodat.
+            Jelentkezz be emaillel és jelszóval.
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5 shadow-lg shadow-black/20">
