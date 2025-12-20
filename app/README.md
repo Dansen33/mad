@@ -52,4 +52,4 @@ npm run dev                          # fejlesztői szerver
 1) Frontend: `page.tsx` statikus listák helyett TanStack Query hívások az /api/products és /api/blog felé.
 2) Kosár API + Zustand store: `POST /api/cart/items` stb. és drawer UI összekötése.
 3) Auth (NextAuth) + sessionhez kötött kosár.
-4) MySQL/Postgres átállás éles környezetre, majd fizetési integráció (Stripe/XYZXYZ).
+4) MySQL/Postgres átállás éles környezetre, majd fizetési integráció (Stripe/Barion).

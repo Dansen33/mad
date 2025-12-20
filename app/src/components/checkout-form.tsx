@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type CartItem = {
@@ -24,6 +25,8 @@ export function CheckoutForm({ items, subtotal }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [billingSame, setBillingSame] = useState(true);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<
     { id: string; label: string; note?: string; priceHuf: number }[]
   >([]);
@@ -129,6 +132,13 @@ export function CheckoutForm({ items, subtotal }: Props) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!acceptedTerms) {
+      setTermsError(true);
+      setStatus("error");
+      setMessage("Nem fogadta el a vásárlási feltételeket.");
+      return;
+    }
+
     const form = new FormData(e.currentTarget);
     const payload = {
       email: form.get("email"),
@@ -176,35 +186,81 @@ export function CheckoutForm({ items, subtotal }: Props) {
       }
       const order = await res.json().catch(() => null);
 
-      // 2) Stripe checkout session indítása, ha kártyás fizetés
-      const stripeResp = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((it) => {
-            const upgradeSum = (it.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
-            return {
-              name: it.name,
-              priceHuf: it.priceHuf + upgradeSum,
-              quantity: it.quantity,
-            };
+      // 2) Barion (alap) vagy Stripe (fallback, ha Barion kikapcsolva)
+      const useBarion = process.env.NEXT_PUBLIC_USE_BARION !== "false";
+
+      if (useBarion) {
+        const barionResp = await fetch("/api/payments/barion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: order?.orderId,
+            orderNumber: order?.orderNumber,
+            email: (form.get("email") as string) || undefined,
+            items: items.map((it) => {
+              const upgradeSum = (it.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
+              return {
+                name: it.name,
+                priceHuf: it.priceHuf + upgradeSum,
+                quantity: it.quantity,
+              };
+            }),
+            shippingHuf: items.length ? selectedShippingPrice : 0,
+            discountHuf,
+            totalHuf: computedTotal,
+            successUrl:
+              typeof window !== "undefined"
+                ? `${window.location.origin}/fizetes-siker`
+                : undefined,
+            cancelUrl:
+              typeof window !== "undefined"
+                ? `${window.location.origin}/fizetes-hiba`
+                : undefined,
           }),
-          shippingHuf: items.length ? selectedShippingPrice : 0,
-          discountHuf,
-          totalHuf: computedTotal,
-          email: (form.get("email") as string) || undefined,
-          orderId: order?.orderId, // opcionális, ha később webhooknál használjuk
-        }),
-      });
-      if (!stripeResp.ok) {
+        });
+        if (!barionResp.ok) {
+          setStatus("error");
+          setMessage("Barion fizetés indítása nem sikerült.");
+          return;
+        }
+        const barionData = await barionResp.json().catch(() => null);
+        if (barionData?.redirectUrl) {
+          window.location.href = barionData.redirectUrl;
+          return;
+        }
         setStatus("error");
-        setMessage("Stripe fizetés indítása nem sikerült.");
+        setMessage("Barion válasz nem tartalmaz redirect URL-t.");
         return;
-      }
-      const stripeData = await stripeResp.json();
-      if (stripeData?.url) {
-        window.location.href = stripeData.url;
-        return;
+      } else {
+        const stripeResp = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((it) => {
+              const upgradeSum = (it.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
+              return {
+                name: it.name,
+                priceHuf: it.priceHuf + upgradeSum,
+                quantity: it.quantity,
+              };
+            }),
+            shippingHuf: items.length ? selectedShippingPrice : 0,
+            discountHuf,
+            totalHuf: computedTotal,
+            email: (form.get("email") as string) || undefined,
+            orderId: order?.orderId, // opcionális, ha később webhooknál használjuk
+          }),
+        });
+        if (!stripeResp.ok) {
+          setStatus("error");
+          setMessage("Stripe fizetés indítása nem sikerült.");
+          return;
+        }
+        const stripeData = await stripeResp.json();
+        if (stripeData?.url) {
+          window.location.href = stripeData.url;
+          return;
+        }
       }
 
       setStatus("success");
@@ -548,16 +604,55 @@ export function CheckoutForm({ items, subtotal }: Props) {
           <span>Végösszeg</span>
           <span>{new Intl.NumberFormat("hu-HU").format(computedTotal)} Ft</span>
         </div>
+        <div className="space-y-2 rounded-xl border border-border bg-secondary px-3 py-3">
+          <label className="flex items-start gap-2 text-xs font-semibold text-foreground">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={acceptedTerms}
+              onChange={(ev) => {
+                setAcceptedTerms(ev.target.checked);
+                if (ev.target.checked) {
+                  setTermsError(false);
+                  if (status === "error" && message === "Nem fogadta el a vásárlási feltételeket.") {
+                    setMessage(null);
+                    setStatus("idle");
+                  }
+                }
+              }}
+            />
+            <span>
+              Elfogadom az{" "}
+              <Link className="text-primary underline" href="/aszf" target="_blank" rel="noreferrer">
+                Általános szerződési feltételeket
+              </Link>{" "}
+              és az{" "}
+              <Link className="text-primary underline" href="/adatvedelem" target="_blank" rel="noreferrer">
+                Adatkezelési tájékoztatót
+              </Link>
+              . Tudomásul veszem, hogy a megrendelés elküldése fizetési kötelezettséggel jár.
+            </span>
+          </label>
+          {termsError && (
+            <div className="text-xs font-semibold text-red-600">Nem fogadta el a vásárlási feltételeket.</div>
+          )}
+        </div>
         <button
           type="submit"
           disabled={status === "loading"}
-          className="mt-4 w-full rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-3 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 disabled:opacity-70"
+          className={`mt-4 w-full rounded-full px-4 py-3 text-sm font-bold shadow-lg ${
+            termsError && !acceptedTerms
+              ? "bg-red-600 text-white shadow-red-400/50"
+              : "bg-gradient-to-r from-primary to-[#5de7bd] text-[#0c0f14] shadow-primary/30"
+          } disabled:opacity-70`}
         >
           {status === "loading" ? "Rendelés küldése..." : "Rendelés leadása"}
         </button>
-        <p className="text-xs text-muted-foreground">
-          A rendelés leadásával elfogadod az ÁSZF-et és az Adatvédelmi tájékoztatót.
-        </p>
+        {!termsError && (
+          <p className="text-xs text-muted-foreground">
+            A rendelés leadásával elfogadod az ÁSZF-et és az Adatvédelmi tájékoztatót.
+          </p>
+        )}
       </div>
     </form>
   );

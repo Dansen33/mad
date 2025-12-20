@@ -125,18 +125,16 @@ export default function AszfPage() {
             </ul>
             <div className="space-y-2">
               <p className="font-semibold">Fizetési módok:</p>
-              <p><strong>Személyes átvétel:</strong> Készpénzben a megjelölt helyszínen (H-P 10:00-18:00, Sz-V zárva).</p>
               <p><strong>Fizetés utánvétellel:</strong> A futárnak vagy csomagponton készpénzben vagy bankkártyával.</p>
               <p><strong>Átutalással:</strong> A visszaigazoló e-mailben szereplő bankszámlára 3 napon belül.</p>
               <p><strong>Online bankkártyával:</strong> Biztonságos fizetési rendszer használata.</p>
-              <p><strong>Bankkártyás fizetés XYZXYZnal:</strong> A XYZXYZ Payment Zrt. kezeli a bankkártya adatokat, engedélyszám: H-EN-I-1064/2013.</p>
+              <p><strong>Bankkártyás fizetés Barionnal:</strong> A Barion Payment Zrt. kezeli a bankkártya adatokat, engedélyszám: H-EN-I-1064/2013.</p>
             </div>
             <div className="space-y-2">
               <p className="font-semibold">Szállítási költségek (bruttó):</p>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Fáma futár házhoz: 2.500 Ft</li>
                 <li>GLS futár házhoz: 3.490 Ft</li>
-                <li>PostaPont: 3.500 Ft</li>
+                <li>PostaPont: 3.990 Ft</li>
               </ul>
               <p>Utánvét esetén minden alkalommal 3.000 Ft utánvét kezelési díj.</p>
             </div>

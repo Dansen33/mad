@@ -41,7 +41,7 @@ Szállítási költség: 3 990 Ft
           Előre utalással: Összeg átutalása közvetlenül a bankszámlánkra. Kérem a rendelési azonosítót a megjegyzésbe írja bele. A megrendelést akkor fogadjuk el, ha megérkezett az összeg.
         </li>
         <li>
-          WELLCOMP.HU ingyenes és biztonságos bankkártyás fizetés XYZXYZ-nal: A kényelmes és biztonságos online fizetést a XYZXYZ Payment Zrt. biztosítja, MNB engedély száma: H-EN-I-1064/2013.
+          WELLCOMP.HU ingyenes és biztonságos bankkártyás fizetés Barion-nal: A kényelmes és biztonságos online fizetést a Barion Payment Zrt. biztosítja, MNB engedély száma: H-EN-I-1064/2013.
           Bankkártya adatai áruházunkhoz nem jutnak el. A webshopunk a kártya-, illetve a mögötte álló számla adatainak, számának, lejárati dátumának semmilyen formában nincs birtokában, abba betekintést nem nyerhet.
         </li>
       </ul>

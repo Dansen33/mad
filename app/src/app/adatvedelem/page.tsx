@@ -130,7 +130,7 @@ export default function AdatvedelemPage() {
         </section>
 
         <section className="space-y-4 text-sm leading-relaxed text-muted-foreground">
-          <h3 className="text-base font-semibold text-foreground">XYZXYZ Pixel használata és marketing cookie-k</h3>
+          <h3 className="text-base font-semibold text-foreground">Barion Pixel használata és marketing cookie-k</h3>
           <div className="space-y-2">
             <p>
               <strong>ba_vid:</strong> csalás kiszűrés, digitális ujjlenyomat, 1,5 évig.
@@ -143,16 +143,16 @@ export default function AdatvedelemPage() {
             </p>
           </div>
           <p>
-            Az élettartam meghosszabbodik minden látogatásnál. Az adatkezelés a XYZXYZ jogos érdeke csalás megelőzésére. További információk a tájékoztatóban.
+            Az élettartam meghosszabbodik minden látogatásnál. Az adatkezelés a Barion jogos érdeke csalás megelőzésére. További információk a tájékoztatóban.
           </p>
           <p>
-            <strong>Marketing cookie-k:</strong> XYZXYZMarketingConsent.xxx, Media and advertiser partners&apos; cookie. Hozzájárulás szükséges. Cél: releváns reklámok és ajánlatok; adatkezelés az érintett viselkedésére alapozva.
+            <strong>Marketing cookie-k:</strong> BarionMarketingConsent.xxx, Media and advertiser partners&apos; cookie. Hozzájárulás szükséges. Cél: releváns reklámok és ajánlatok; adatkezelés az érintett viselkedésére alapozva.
           </p>
         </section>
 
         <section className="space-y-4 text-sm leading-relaxed text-muted-foreground">
           <h3 className="text-base font-semibold text-foreground">Adatfeldolgozó partnerek</h3>
-          <p>XYZXYZ Marketing Cloud és XYZXYZ Pixel: DataMe Kft., 1118 Budapest, Ugron Gábor utca 35.</p>
+          <p>Barion Marketing Cloud és Barion Pixel: DataMe Kft., 1118 Budapest, Ugron Gábor utca 35.</p>
           <p>Ügyfélszolgálat: Minerva-Soft Development & Provider LLC, 3900 Szerencs, Lipták út 1/a.</p>
           <p>Panaszkezelés telefonja: Interswitch LLC, 1056 Budapest, Irányi utca 15.</p>
           <p>Pénzmosási azonosítás: TechTeamer LLC, 1095 Budapest, Lechner Ödön sugárút 3. 2. 1., B.</p>
@@ -241,7 +241,7 @@ export default function AdatvedelemPage() {
         <section className="space-y-4 text-sm leading-relaxed text-muted-foreground">
           <h3 className="text-base font-semibold text-foreground">Adattovábbítás harmadik fél részére</h3>
           <p>
-            Fuvarozás: MPL Magyar Posta Logisztika Kft. és GLS Magyarország Kft. Online fizetés: XYZXYZ Payment Zrt. (H-1117 Budapest, Infopark sétány 1., engedély: H-EN-I-1064/2013, intézmény azonosító: 14859034).
+            Fuvarozás: MPL Magyar Posta Logisztika Kft. és GLS Magyarország Kft. Online fizetés: Barion Payment Zrt. (H-1117 Budapest, Infopark sétány 1., engedély: H-EN-I-1064/2013, intézmény azonosító: 14859034).
           </p>
         </section>
 

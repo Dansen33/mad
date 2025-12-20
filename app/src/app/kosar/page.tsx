@@ -52,7 +52,7 @@ export default async function CartPage() {
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-full bg-primary/15 px-4 py-2 text-xs font-bold text-primary">
-              🔒Stripe Biztonságos fizetés
+               Biztonságos fizetés
             </div>
           </div>
           <div className="mt-3 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
