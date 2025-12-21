@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -23,13 +24,15 @@ export function SiteFooter() {
               href="tel:+36703176680"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold shadow-sm hover:border-primary/60"
             >
-              📞 +36 70 317 6680
+              <Image src="/phone.svg" alt="Telefon" width={16} height={16} />
+              +36 70 317 6680
             </a>
             <Link
               href="/kapcsolat#contact-form"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-primary/30 shadow-lg"
             >
-              ✉️ Kapcsolat űrlap
+              <Image src="/mail.svg" alt="E-mail" width={16} height={16} />
+              Kapcsolat űrlap
             </Link>
           </div>
         </div>
@@ -120,8 +123,16 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} WELLCOMP. Minden jog fenntartva.</span>
           <div className="flex items-center gap-4">
-            <div className="flex gap-3">
-            <img src="/barionbannersm.png" alt="Barion" className="h-18 w-auto" />
+            <div className="flex items-center gap-3">
+              <Link href="mailto:info@wellcomp.hu" className="flex items-center gap-2 hover:text-foreground">
+                <Image src="/mail.svg" alt="E-mail" width={16} height={16} />
+                <span>info@wellcomp.hu</span>
+              </Link>
+              <Link href="tel:+36703176680" className="flex items-center gap-2 hover:text-foreground">
+                <Image src="/phone.svg" alt="Telefon" width={16} height={16} />
+                <span>+36 70 317 6680</span>
+              </Link>
+              <img src="/barionbannersm.png" alt="Barion" className="h-18 w-auto" />
             </div>
           </div>
         </div>

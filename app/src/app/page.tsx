@@ -426,10 +426,10 @@ export default function Home() {
                 csomagolással adunk át. Vállalkozásoknak és magánszemélyeknek
                 egyaránt.
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 -mx-4 flex flex-wrap gap-2">
                 {[
                   "24-48 órás szállítás",
-                  "2 év limitált garancia felújított termékekre is",
+                  "2 év limitált garancia felújított termékekre",
                   "Kiváló minőségű termékek",
                 ].map((pill) => (
                   <span
