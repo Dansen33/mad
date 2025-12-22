@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { sendFacebookEvent } from "@/lib/client/fb-events";
 
 type Props = {
   productSlug: string;
@@ -41,6 +42,11 @@ export function AddToCartButton({ productSlug, productName, disabled = false, up
         window.localStorage.setItem("cart-total-huf", String(data.totalHuf));
       }
       setShowToast(true);
+
+      sendFacebookEvent({
+        eventName: "AddToCart",
+        sourceUrl: typeof window !== "undefined" ? window.location.href : undefined,
+      });
     } finally {
       setLoading(false);
     }

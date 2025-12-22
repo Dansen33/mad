@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { UpgradePicker } from "@/components/upgrade-picker";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { RecentlyViewed } from "@/components/recently-viewed";
+import { ViewContentTracker } from "@/components/view-content-tracker";
 
 type ProdImage = { url: string; alt?: string | null; _key?: string };
 type ProductData = {
@@ -215,6 +216,7 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <div className="min-h-screen text-foreground">
       <ProductHeader />
+      <ViewContentTracker value={finalPrice} currency="HUF" />
 
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 pb-16 pt-10">
         {/* Breadcrumb */}

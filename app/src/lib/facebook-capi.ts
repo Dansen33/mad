@@ -4,24 +4,27 @@ type UserData = {
   em?: string[];
   ph?: string[];
   ct?: string[];
+  st?: string[];
   country?: string[];
   db?: string[];
   client_user_agent?: string;
   client_ip_address?: string;
 };
 
-type PurchasePayload = {
+type BasePayload = {
   eventId: string;
-  value: number;
+  eventName: string;
+  sourceUrl?: string;
   currency?: string;
+  value?: number;
   email?: string;
   phone?: string;
   city?: string;
+  region?: string;
   country?: string;
   dateOfBirth?: string; // YYYYMMDD
   userAgent?: string | null;
   ip?: string | null;
-  sourceUrl?: string;
 };
 
 function sha256(input?: string | null) {
@@ -33,11 +36,12 @@ function sha256(input?: string | null) {
   }
 }
 
-function buildUserData(payload: PurchasePayload): UserData {
+function buildUserData(payload: BasePayload): UserData {
   return {
     em: payload.email ? [sha256(payload.email)!] : undefined,
     ph: payload.phone ? [sha256(payload.phone.replace(/\D/g, ""))!] : undefined,
     ct: payload.city ? [sha256(payload.city)!] : undefined,
+    st: payload.region ? [sha256(payload.region)!] : undefined,
     country: payload.country ? [sha256(payload.country)!] : undefined,
     db: payload.dateOfBirth ? [sha256(payload.dateOfBirth)!] : undefined,
     client_user_agent: payload.userAgent || undefined,
@@ -45,23 +49,23 @@ function buildUserData(payload: PurchasePayload): UserData {
   };
 }
 
-export async function sendPurchaseCapi(payload: PurchasePayload) {
+export async function sendCapiEvent(payload: BasePayload) {
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const token = process.env.FACEBOOK_CONVERSIONS_API_TOKEN;
   if (!pixelId || !token) return;
-  if (!payload.eventId) return;
+  if (!payload.eventId || !payload.eventName) return;
 
   const body = {
     data: [
       {
-        event_name: "Purchase",
+        event_name: payload.eventName,
         event_time: Math.floor(Date.now() / 1000),
         event_id: payload.eventId,
-        event_source_url: payload.sourceUrl || "https://wellcomp.hu/fizetes-siker",
+        event_source_url: payload.sourceUrl || "https://wellcomp.hu/",
         action_source: "website",
         user_data: buildUserData(payload),
         custom_data: {
-          currency: payload.currency || "HUF",
+          currency: payload.currency || (payload.value ? "HUF" : undefined),
           value: payload.value,
         },
       },
@@ -82,4 +86,11 @@ export async function sendPurchaseCapi(payload: PurchasePayload) {
   } catch (err) {
     console.error("Facebook CAPI request failed", err);
   }
+}
+
+export async function sendPurchaseCapi(payload: Omit<BasePayload, "eventName"> & { value: number }) {
+  return sendCapiEvent({
+    ...payload,
+    eventName: "Purchase",
+  });
 }

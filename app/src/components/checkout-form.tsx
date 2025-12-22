@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { sendFacebookEvent } from "@/lib/client/fb-events";
 
 type CartItem = {
   slug: string;
@@ -94,6 +95,13 @@ export function CheckoutForm({ items, subtotal }: Props) {
     };
     loadSession();
     loadAddress();
+  }, []);
+
+  useEffect(() => {
+    sendFacebookEvent({
+      eventName: "InitiateCheckout",
+      sourceUrl: typeof window !== "undefined" ? window.location.href : undefined,
+    });
   }, []);
 
   // Szállítási módok Sanity-ből

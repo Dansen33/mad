@@ -6,6 +6,7 @@ import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { RecentlyViewed } from "@/components/recently-viewed";
+import { ViewContentTracker } from "@/components/view-content-tracker";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -147,6 +148,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
   return (
     <div className="min-h-screen text-foreground">
       <ProductHeader />
+      <ViewContentTracker value={typeof finalPrice === "number" ? finalPrice : basePrice} currency="HUF" />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 pb-16 pt-10">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <Link className="hover:text-primary" href="/">
