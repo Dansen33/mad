@@ -13,10 +13,19 @@ type BlogPost = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function BlogIndexPage() {
+export default async function BlogIndexPage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+  const qs = (await searchParams) ?? {};
+  const page = Math.max(1, Number(qs.page) || 1);
+  const limit = 9;
+
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const res = await fetch(`${base}/api/cms/blog`, { cache: "no-store" });
-  const posts = res.ok ? await res.json() : [];
+  const res = await fetch(`${base}/api/cms/blog?page=${page}&limit=${limit}`, { cache: "no-store" });
+  const data = res.ok ? await res.json() : { posts: [], total: 0, totalPages: 1, page };
+  const posts = Array.isArray(data?.posts) ? data.posts : [];
+  const totalPages = Math.max(1, Number(data?.totalPages) || 1);
+  const currentPage = Math.min(page, totalPages);
+
+  const makePageHref = (p: number) => `/blog?page=${p}`;
 
   return (
     <div className="min-h-screen text-foreground">
@@ -75,6 +84,34 @@ export default async function BlogIndexPage() {
             </div>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3">
+            <Link
+              href={makePageHref(Math.max(1, currentPage - 1))}
+              aria-disabled={currentPage === 1}
+              className={`rounded-full border px-3 py-2 text-sm font-semibold ${
+                currentPage === 1 ? "cursor-not-allowed text-muted-foreground" : "hover:border-primary hover:text-primary"
+              }`}
+            >
+              Előző
+            </Link>
+            <span className="text-sm text-muted-foreground">
+              {currentPage} / {totalPages}
+            </span>
+            <Link
+              href={makePageHref(Math.min(totalPages, currentPage + 1))}
+              aria-disabled={currentPage === totalPages}
+              className={`rounded-full border px-3 py-2 text-sm font-semibold ${
+                currentPage === totalPages
+                  ? "cursor-not-allowed text-muted-foreground"
+                  : "hover:border-primary hover:text-primary"
+              }`}
+            >
+              Következő
+            </Link>
+          </div>
+        )}
       </div>
       <SiteFooter />
     </div>

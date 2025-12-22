@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sanityClient } from "@/lib/sanity";
 import { reduceStockForOrder } from "@/lib/order-stock";
+import { sendPurchaseCapi } from "@/lib/facebook-capi";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +114,9 @@ async function handleWebhook(req: Request) {
   let status = body.Status || "";
   let txStatus = body.Transactions?.[0]?.Status || "";
   let orderId = body.Transactions?.[0]?.POSTransactionId || "";
+  const paymentIdForEvent = body.PaymentId || queryPaymentId || "";
+  const userAgent = req.headers.get("user-agent");
+  const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || null;
 
   console.log("Barion webhook received", {
     paymentId,
@@ -140,6 +144,15 @@ async function handleWebhook(req: Request) {
 
     if (orderId) {
       try {
+        let orderData: { email?: string; phone?: string; city?: string; country?: string; totalHuf?: number; orderNumber?: string } | null =
+          null;
+        if (success) {
+          orderData = await sanityClient.fetch(
+            `*[_type=="order" && _id==$id][0]{email,phone,city,country,totalHuf,orderNumber}`,
+            { id: orderId },
+          );
+        }
+
         if (success) {
           await sanityClient
             .patch(orderId)
@@ -150,6 +163,21 @@ async function handleWebhook(req: Request) {
             })
             .commit();
           await reduceStockForOrder(orderId);
+
+          if (orderData?.totalHuf) {
+            void sendPurchaseCapi({
+              eventId: paymentIdForEvent || orderId,
+              value: orderData.totalHuf,
+              currency: "HUF",
+              email: orderData.email,
+              phone: orderData.phone,
+              city: orderData.city,
+              country: orderData.country,
+              sourceUrl: `https://wellcomp.hu/fizetes-siker?paymentId=${encodeURIComponent(paymentIdForEvent || orderId)}`,
+              userAgent: userAgent || undefined,
+              ip: clientIp,
+            });
+          }
         } else if (status === "Canceled" || status === "Expired" || txStatus === "Canceled") {
           await sanityClient
             .patch(orderId)

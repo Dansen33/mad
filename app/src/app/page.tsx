@@ -168,7 +168,8 @@ export default function Home() {
     queryFn: async () => {
       const res = await fetch("/api/cms/blog");
       if (!res.ok) throw new Error("Hiba a blog lekérésénél");
-      return res.json();
+      const data = await res.json();
+      return Array.isArray(data) ? data : Array.isArray(data?.posts) ? data.posts : [];
     },
   });
 

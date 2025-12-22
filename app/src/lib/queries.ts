@@ -201,7 +201,7 @@ export const productsByCategoryQuery = groq`
 `;
 
 export const blogPostsQuery = groq`
-*[_type=="blogPost"]|order(publishedAt desc)[0...$limit]{
+*[_type=="blogPost"]|order(publishedAt desc)[$offset...$offset + $limit]{
   _id,
   title,
   seoTitle,
