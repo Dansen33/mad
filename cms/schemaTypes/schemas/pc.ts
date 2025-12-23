@@ -52,7 +52,9 @@ export default defineType({
       options: {
         list: [
           { title: "12 hó", value: "12_ho" },
+          { title: "12-24 hó", value: "12_24_ho" },
           { title: "24 hó", value: "24_ho" },
+          { title: "24-36 hó", value: "24_36_ho" },
           { title: "36 hó", value: "36_ho" },
           { title: "48 hó", value: "48_ho" },
         ],
@@ -85,6 +87,13 @@ export default defineType({
       type: "boolean",
       initialValue: false,
       description: "Ha be van kapcsolva, a frontenden megjelennek az SSD bővítési opciók az árlistából.",
+    }),
+    defineField({
+      name: "allowWifiUpgrades",
+      title: "Wifi / Bluetooth bővíthető",
+      type: "boolean",
+      initialValue: false,
+      description: "Ha be van kapcsolva, a frontenden megjelennek a Wifi/Bluetooth bővítési opciók az árlistából.",
     }),
     defineField({
       name: "brand",

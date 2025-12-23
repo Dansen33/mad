@@ -495,7 +495,7 @@ export default function Home() {
                               "https://dummyimage.com/900x600/0f1320/ffffff&text=wellcomp"
                             }
                             alt={slide.title}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain bg-white"
                             sizes="(min-width: 1024px) 100vw, 100vw"
                             priority
                             unoptimized
@@ -592,7 +592,7 @@ export default function Home() {
                       "https://dummyimage.com/300x300/e5e7eb/0c0f14&text=K%C3%A9p"
                     }
                     alt={item.title || "Kategória"}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    className="h-full w-full object-contain bg-white transition duration-300 group-hover:scale-105"
                     sizes="(min-width: 1024px) 25vw, 50vw"
                     unoptimized
                   />
@@ -635,7 +635,7 @@ export default function Home() {
                               "https://dummyimage.com/600x400/e5e7eb/0c0f14&text=Kep"
                             }
                             alt={product.images?.[0]?.alt || product.name}
-                            className="object-cover"
+                            className="object-contain bg-white"
                             sizes="(min-width: 1024px) 20vw, 50vw"
                             unoptimized
                           />
@@ -829,7 +829,7 @@ export default function Home() {
                       "https://dummyimage.com/900x900/0f1320/ffffff&text=Kiemelt+ajanlat"
                     }
                     alt={featured?.name || "Kiemelt ajánlatunk"}
-                    className="h-full w-full object-cover object-bottom"
+                    className="h-full w-full object-contain bg-white"
                     sizes="(min-width: 1024px) 45vw, 100vw"
                     unoptimized
                   />
@@ -848,7 +848,7 @@ export default function Home() {
                           fill
                           src={img.url}
                           alt={img.alt || featured?.name || "thumb"}
-                          className="object-cover"
+                          className="object-contain bg-white"
                           sizes="96px"
                           unoptimized
                         />

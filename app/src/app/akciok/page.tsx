@@ -283,7 +283,7 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
                           "https://dummyimage.com/600x400/0f1320/ffffff&text=PrimeLaptop"
                         }
                         alt={item.name}
-                        className="object-cover transition duration-300 hover:scale-105"
+                        className="object-contain bg-white transition duration-300 hover:scale-105"
                         sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 80vw"
                         unoptimized
                       />

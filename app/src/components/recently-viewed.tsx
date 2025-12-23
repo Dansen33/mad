@@ -82,7 +82,7 @@ export function RecentlyViewed({ current }: { current: RecentItem }) {
         <img
           src={item.image || FALLBACK_IMG}
           alt={item.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain bg-white"
           loading="lazy"
         />
       </div>

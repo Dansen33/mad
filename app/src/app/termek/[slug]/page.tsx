@@ -240,7 +240,7 @@ export default async function ProductPage({ params }: PageProps) {
                 fill
                 src={images[0].url}
                 alt={images[0].alt || product.name}
-                className="object-cover object-bottom"
+                className="object-contain bg-white"
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 unoptimized
               />
@@ -257,7 +257,7 @@ export default async function ProductPage({ params }: PageProps) {
                       fill
                       src={img.url}
                       alt={img.alt || product.name}
-                      className="object-cover"
+                      className="object-contain bg-white"
                       sizes="200px"
                       unoptimized
                     />

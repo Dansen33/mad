@@ -169,7 +169,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
                 fill
                 src={images[0].url}
                 alt={images[0].alt || phone.name}
-                className="object-cover object-bottom"
+                className="object-contain bg-white"
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 unoptimized
               />
@@ -182,7 +182,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
                       fill
                       src={img.url}
                       alt={img.alt || phone.name}
-                      className="object-cover"
+                      className="object-contain bg-white"
                       sizes="200px"
                       unoptimized
                     />

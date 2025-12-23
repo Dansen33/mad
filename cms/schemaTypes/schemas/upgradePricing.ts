@@ -137,6 +137,27 @@ export default defineType({
       ],
       description: "Laptop SSD bővítések felárai.",
     }),
+    defineField({
+      name: "wifiOptions",
+      title: "Wifi / Bluetooth bővítések",
+      type: "array",
+      of: [
+        defineField({
+          type: "object",
+          name: "wifiItem",
+          fields: [
+            { name: "label", title: "Címke", type: "string", validation: (rule) => rule.required() },
+            {
+              name: "deltaHuf",
+              title: "Felár (HUF)",
+              type: "number",
+              validation: (rule) => rule.required().integer(),
+            },
+          ],
+        }),
+      ],
+      description: "PC Wifi/Bluetooth kiegészítések globális felárai.",
+    }),
   ],
   preview: {
     select: { title: "title" },

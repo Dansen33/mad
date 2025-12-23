@@ -602,7 +602,7 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                         src={firstImage}
                         alt={pc.images?.[0]?.alt || pc.name}
                         fill
-                        className="object-cover"
+                        className="object-contain bg-white"
                         sizes="400px"
                         unoptimized
                       />

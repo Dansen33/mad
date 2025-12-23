@@ -572,7 +572,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
                         src={firstImage}
                         alt={phone.images?.[0]?.alt || phone.name}
                         fill
-                        className="object-cover"
+                        className="object-contain bg-white"
                         sizes="400px"
                         unoptimized
                       />

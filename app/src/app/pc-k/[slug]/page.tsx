@@ -30,6 +30,7 @@ type PcData = {
   allowMemoryUpgrades?: boolean;
   memoryUpgradeGroup?: "ddr4" | "ddr5";
   allowSsdUpgrades?: boolean;
+  allowWifiUpgrades?: boolean;
   shortDescription?: string;
   info?: string;
   note?: string;
@@ -53,6 +54,7 @@ type UpgradePricing = {
   ddr4Options?: { label: string; deltaHuf: number }[];
   ddr5Options?: { label: string; deltaHuf: number }[];
   ssdOptions?: { label: string; deltaHuf: number }[];
+  wifiOptions?: { label: string; deltaHuf: number }[];
 };
 
 async function fetchPc(slug: string) {
@@ -70,6 +72,7 @@ async function fetchPc(slug: string) {
       allowMemoryUpgrades,
       memoryUpgradeGroup,
       allowSsdUpgrades,
+      allowWifiUpgrades,
       shortDescription,
       info,
       note,
@@ -136,13 +139,15 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
     `*[_type=="upgradePricing"][0]{
       ddr4Options[]{label,deltaHuf},
       ddr5Options[]{label,deltaHuf},
-      ssdOptions[]{label,deltaHuf}
+      ssdOptions[]{label,deltaHuf},
+      wifiOptions[]{label,deltaHuf}
     }`,
   );
   const pricingSafe: UpgradePricing = {
     ddr4Options: pricing?.ddr4Options ?? [],
     ddr5Options: pricing?.ddr5Options ?? [],
     ssdOptions: pricing?.ssdOptions ?? [],
+    wifiOptions: pricing?.wifiOptions ?? [],
   };
 
   const images = pc.images?.length
@@ -169,7 +174,9 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
   };
   const warrantyLabels: Record<string, string> = {
     "12_ho": "12 hó",
+    "12_24_ho": "12-24 hó",
     "24_ho": "24 hó",
+    "24_36_ho": "24-36 hó",
     "36_ho": "36 hó",
     "48_ho": "48 hó",
   };
@@ -218,7 +225,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                 fill
                 src={images[0].url}
                 alt={images[0].alt || pc.name}
-                className="object-cover object-bottom"
+                className="object-contain bg-white"
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 unoptimized
               />
@@ -231,7 +238,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                       fill
                       src={img.url}
                       alt={img.alt || pc.name}
-                      className="object-cover"
+                      className="object-contain bg-white"
                       sizes="200px"
                       unoptimized
                     />
@@ -257,7 +264,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
             </div>
             <h1 className="text-2xl font-extrabold">{pc.name}</h1>
             <p className="text-sm text-muted-foreground">
-              {pc.shortDescription || pc.info || "Professzionális PC konfiguráció."}
+              {pc.shortDescription || "Professzionális PC konfiguráció."}
             </p>
             <div className="flex items-baseline gap-3 text-3xl font-extrabold">
               <span className={compareAt !== undefined ? "text-primary" : "text-foreground"}>{price}</span>
@@ -268,7 +275,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
               )}
             </div>
 
-            {pc.allowMemoryUpgrades || pc.allowSsdUpgrades ? (
+            {pc.allowMemoryUpgrades || pc.allowSsdUpgrades || pc.allowWifiUpgrades ? (
               <UpgradePicker
                 productSlug={pc.slug}
                 productName={pc.name}
@@ -281,6 +288,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                     : []
                 }
                 ssdOptions={pc.allowSsdUpgrades ? pricingSafe.ssdOptions : []}
+                wifiOptions={pc.allowWifiUpgrades ? pricingSafe.wifiOptions : []}
                 disabled={pc.stock !== undefined && pc.stock <= 0}
               />
             ) : (
@@ -303,9 +311,20 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
 
             <div className="rounded-xl border border-border bg-secondary p-3">
               <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
-              <div className="text-sm font-semibold text-foreground whitespace-pre-line">
-                {pc.info || "Testre szabható konfiguráció, kérd ajánlatunkat."}
-              </div>
+              {pc.info ? (
+                <div className="text-sm font-semibold text-foreground whitespace-pre-line">{pc.info}</div>
+              ) : (
+                <div className="space-y-1 text-sm font-semibold text-foreground whitespace-pre-line">
+                  <div>
+                    Személyre szabható konfiguráció, egyéni kérés esetén kérjük vegye fel velünk a{" "}
+                    <Link href="/kapcsolat" className="text-primary hover:text-primary/80">
+                      kapcsolatot
+                    </Link>
+                    .
+                  </div>
+                  <div className="text-xs font-normal text-muted-foreground">A kép csak illusztráció.</div>
+                </div>
+              )}
             </div>
             {pc.note && (
               <div className="rounded-xl border border-border bg-secondary p-3">
