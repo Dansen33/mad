@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { AddToCartButton } from "./add-to-cart-button";
+import { useCasePreviewStore } from "@/store/case-preview-store";
 
 type UpgradeOption = { label: string; deltaHuf: number };
 type CaseOption = { label: string; deltaHuf: number; image?: string | null };
@@ -35,6 +36,7 @@ export function UpgradePicker({
   const [wifiIdx, setWifiIdx] = useState<number>(-1);
   const [caseIdx, setCaseIdx] = useState<number>(-1);
   const [caseOpen, setCaseOpen] = useState(false);
+  const setCaseImage = useCasePreviewStore((state) => state.setCaseImage);
 
   const selectedCase = caseIdx >= 0 && caseOptions[caseIdx] ? caseOptions[caseIdx] : null;
 
@@ -132,6 +134,7 @@ export function UpgradePicker({
                 onClick={() => {
                   setCaseIdx(-1);
                   onCaseChange?.(null);
+                  setCaseImage(productSlug, null);
                   setCaseOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition ${
@@ -151,6 +154,7 @@ export function UpgradePicker({
                   onClick={() => {
                     setCaseIdx(idx);
                     onCaseChange?.(opt.image || null);
+                    setCaseImage(productSlug, opt.image || null);
                     setCaseOpen(false);
                   }}
                   className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition ${

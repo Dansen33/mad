@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useCasePreviewStore } from "@/store/case-preview-store";
 
 type Img = { url: string; alt?: string | null };
 type UpgradeOption = { label: string; deltaHuf: number };
@@ -20,24 +21,35 @@ type Props = {
   wifiOptions?: UpgradeOption[];
   caseOptions?: CaseOption[];
   disabled?: boolean;
+  selectedCaseImage?: string | null;
 };
 
 export function PcImageUpgrades({
   images,
+  pcSlug,
   pcName,
+  selectedCaseImage,
 }: Props) {
   const primaryImage = images[0] || { url: "", alt: pcName };
-  const [mainImage, setMainImage] = useState<Img>(primaryImage);
+  const [fallbackImage, setFallbackImage] = useState<Img>(primaryImage);
+  const caseImageFromStore = useCasePreviewStore(
+    (state) => (pcSlug ? state.caseImages[pcSlug] ?? null : null),
+  );
+  const effectiveCaseImage = useMemo(
+    () => selectedCaseImage ?? caseImageFromStore,
+    [selectedCaseImage, caseImageFromStore],
+  );
+  const displayImage: Img = effectiveCaseImage ? { url: effectiveCaseImage, alt: pcName } : fallbackImage;
 
   return (
     <div className="space-y-3">
       <div className="space-y-3">
         <div className="relative w-full overflow-hidden rounded-2xl border border-border min-h-[710px]">
-          {mainImage?.url ? (
+          {displayImage?.url ? (
             <Image
               fill
-              src={mainImage.url}
-              alt={mainImage.alt || pcName}
+              src={displayImage.url}
+              alt={displayImage.alt || pcName}
               className="object-contain bg-white"
               sizes="(min-width: 1024px) 50vw, 100vw"
               unoptimized
@@ -53,7 +65,9 @@ export function PcImageUpgrades({
                 type="button"
                 key={img.url}
                 className="relative h-24 overflow-hidden rounded-xl border border-border bg-white"
-                onClick={() => setMainImage(img)}
+                onClick={() => {
+                  setFallbackImage(img);
+                }}
               >
                 <Image fill src={img.url} alt={img.alt || pcName} className="object-contain" sizes="200px" unoptimized />
               </button>
