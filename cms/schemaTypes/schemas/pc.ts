@@ -96,6 +96,21 @@ export default defineType({
       description: "Ha be van kapcsolva, a frontenden megjelennek a Wifi/Bluetooth bővítési opciók az árlistából.",
     }),
     defineField({
+      name: "allowCaseUpgrades",
+      title: "PC ház választható",
+      type: "boolean",
+      initialValue: false,
+      description: "Ha be van kapcsolva, a frontenden megjelennek a PC ház opciók az árlistából.",
+    }),
+    defineField({
+      name: "allowedCaseOptions",
+      title: "Engedélyezett ház opciók (opcionális)",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "Ha üres, minden globális ház opció választható. Ha megadod, csak ezek a címkék jelennek meg.",
+      hidden: ({ parent }) => parent?.allowCaseUpgrades !== true,
+    }),
+    defineField({
       name: "brand",
       title: "Márka",
       type: "string",

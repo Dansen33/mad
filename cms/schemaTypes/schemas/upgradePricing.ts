@@ -158,6 +158,35 @@ export default defineType({
       ],
       description: "PC Wifi/Bluetooth kiegészítések globális felárai.",
     }),
+    defineField({
+      name: "caseOptions",
+      title: "PC ház bővítések",
+      type: "array",
+      of: [
+        defineField({
+          type: "object",
+          name: "caseItem",
+          fields: [
+            { name: "label", title: "Címke", type: "string", validation: (rule) => rule.required() },
+            {
+              name: "deltaHuf",
+              title: "Felár (HUF)",
+              type: "number",
+              validation: (rule) => rule.required().integer(),
+            },
+            {
+              name: "image",
+              title: "Kép (opcionális)",
+              type: "image",
+              options: { hotspot: true },
+              fields: [{ name: "alt", title: "Alt szöveg", type: "string" }],
+              description: "Kis bélyegkép a dropdownhoz (ajánlott 50x50 px körüli nézethez).",
+            },
+          ],
+        }),
+      ],
+      description: "Globális PC ház felárak (választható opciók).",
+    }),
   ],
   preview: {
     select: { title: "title" },

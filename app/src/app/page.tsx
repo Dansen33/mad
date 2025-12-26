@@ -443,7 +443,7 @@ export default function Home() {
               </div>
               <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
-                  { label: "Készlet", value: "100+ modell", sub: "Folyamatosan frissítve" },
+                  { label: "Készlet", value: "100+ termék", sub: "Folyamatosan frissítve" },
                   { label: "Átlag értékelés", value: "4.9 / 5", sub: "Ügyfélelégedettség" },
                   { label: "Szerviz", value: "30+ teszt", sub: "Átadás előtt" },
                 ].map((item) => (
@@ -613,7 +613,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative pb-12">
               <div
                 ref={featuredCarouselRef}
                 className="flex gap-4 overflow-x-auto scroll-smooth pb-2 snap-x snap-mandatory"
@@ -699,11 +699,11 @@ export default function Home() {
                 })}
               </div>
               {featuredCarouselSlides.length > 1 && (
-                <>
+                <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => scrollFeaturedCarousel("prev")}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card/90 text-xl font-bold shadow hover:border-primary"
+                    className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-card/85 text-lg font-bold text-muted-foreground shadow-sm backdrop-blur hover:border-primary hover:text-primary"
                     aria-label="Előző termékcsoport"
                   >
                     ‹
@@ -711,12 +711,12 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => scrollFeaturedCarousel("next")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card/90 text-xl font-bold shadow hover:border-primary"
+                    className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-card/85 text-lg font-bold text-muted-foreground shadow-sm backdrop-blur hover:border-primary hover:text-primary"
                     aria-label="Következő termékcsoport"
                   >
                     ›
                   </button>
-                </>
+                </div>
               )}
               {!featuredCarouselSlides.length && !featuredCarouselQuery.isLoading && (
                 <div className="flex items-center justify-center rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">

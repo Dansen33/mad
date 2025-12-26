@@ -263,15 +263,21 @@ function parseSearchParams(search: Record<string, string | string[] | undefined>
   const ssd = typeof search.ssd === "string" && search.ssd ? search.ssd : undefined;
   const priceMin = typeof search.priceMin === "string" && search.priceMin ? Number(search.priceMin) : undefined;
   const priceMax = typeof search.priceMax === "string" && search.priceMax ? Number(search.priceMax) : undefined;
-  return { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax };
+  const page =
+    typeof search.page === "string" && Number.isFinite(Number(search.page)) && Number(search.page) > 0
+      ? Number(search.page)
+      : 1;
+  return { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax, page };
 }
 
 export default async function PcOsszes({ searchParams }: { searchParams: SearchParams }) {
   const qs = await searchParams;
-  const { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax } = parseSearchParams(qs);
+  const { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax, page } =
+    parseSearchParams(qs);
   const qNoSpace = q ? q.replace(/\s+/g, "") : "";
 
   const orderBy = [{ field: "_createdAt", direction: "desc" as const }];
+  const pageSize = 9;
 
   const pcs: PcHit[] = await sanityClient.fetch(
     `*[_type=="pc"
@@ -496,6 +502,32 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
 
   const formatPrice = (value?: number) =>
     typeof value === "number" ? `${new Intl.NumberFormat("hu-HU").format(value)} Ft` : "Árért érdeklődj";
+  const totalPcs = sortedPcs.length;
+  const totalPages = Math.max(1, Math.ceil(totalPcs / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const pageItems = sortedPcs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    const append = (key: string, value?: string | number) => {
+      if (value === undefined || value === "") return;
+      params.set(key, String(value));
+    };
+    append("sort", sort);
+    append("brand", brand);
+    append("condition", condition);
+    append("category", category);
+    append("q", q);
+    append("cpu", cpu);
+    append("memory", memory);
+    append("gpu", gpu);
+    append("ssd", ssd);
+    append("priceMin", priceMin);
+    append("priceMax", priceMax);
+    append("page", targetPage);
+    const qs = params.toString();
+    return qs ? `/pc-k/osszes?${qs}` : "/pc-k/osszes";
+  };
 
   return (
     <div className="min-h-screen text-foreground">
@@ -521,7 +553,7 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                 sort={sort}
                 params={{ brand, category, q, cpu, memory, gpu, ssd, priceMin, priceMax }}
               />
-              <div className="text-muted-foreground">{sortedPcs.length} találat</div>
+              <div className="text-muted-foreground">{totalPcs} találat</div>
             </div>
           </div>
         </div>
@@ -543,115 +575,146 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
             <FilterForm key={filterKey} {...filterProps} />
           </aside>
 
-          <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {!sortedPcs.length && (
-              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
-                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
-                <p className="mt-1">
-                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
-                </p>
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {!pageItems.length && (
+                <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                  <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                  <p className="mt-1">
+                    A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                  </p>
+                  <Link
+                    href="/pc-k/osszes"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  >
+                    Összes PC megtekintése
+                  </Link>
+                </div>
+              )}
+              {pageItems.map((pc, idx) => {
+                const firstImage = pc.images?.[0]?.url;
+                const specs = pc.specs || {};
+                const specList = [specs.processor, specs.gpu, specs.memory, specs.ssd].filter(Boolean).slice(0, 3);
+                const discounts = Array.isArray(pc.discounts) ? pc.discounts : [];
+                const basePrice = typeof pc.priceHuf === "number" ? pc.priceHuf : undefined;
+                const bestDiscount =
+                  basePrice && discounts.length
+                    ? discounts
+                        .map((d) => {
+                          if (!d || typeof d.amount !== "number") return 0;
+                          if (d.type === "percent") return Math.round(basePrice * d.amount * 0.01);
+                          if (d.type === "fixed") return d.amount;
+                          return 0;
+                        })
+                        .filter((v) => v > 0)
+                        .sort((a, b) => b - a)[0] ?? 0
+                    : 0;
+                const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
+                const invalidDiscount =
+                  (typeof computedFinal === "number" && computedFinal < 0) || pc.invalidDiscount || false;
+                const finalPrice =
+                  !invalidDiscount && typeof computedFinal === "number"
+                    ? computedFinal
+                    : typeof pc.finalPriceHuf === "number"
+                      ? pc.finalPriceHuf
+                      : basePrice;
+                const compareAt =
+                  !invalidDiscount && typeof finalPrice === "number" && bestDiscount > 0
+                    ? basePrice
+                    : typeof pc.compareAtHuf === "number" && typeof finalPrice === "number" && pc.compareAtHuf > finalPrice
+                      ? pc.compareAtHuf
+                      : undefined;
+                return (
+                  <div
+                    key={`${pc.slug || pc._id || pc.name || "pc"}-${idx}`}
+                    className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
+                  >
+                    <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-secondary">
+                      {firstImage ? (
+                        <Image
+                          src={firstImage}
+                          alt={pc.images?.[0]?.alt || pc.name}
+                          fill
+                          className="object-contain bg-white"
+                          sizes="400px"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                          Nincs kép
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="text-xs uppercase text-primary">{pc.brand}</div>
+                      <h3 className="text-lg font-bold leading-tight text-foreground">
+                        <Link href={`/pc-k/${pc.slug}`} className="hover:text-primary">
+                          {pc.name}
+                        </Link>
+                      </h3>
+                      <div className="flex flex-col gap-1">
+                        {compareAt !== undefined && (
+                          <span className="text-sm font-semibold text-muted-foreground line-through">
+                            {formatPrice(compareAt)}
+                          </span>
+                        )}
+                        <div
+                          className={`text-2xl font-extrabold ${
+                            compareAt !== undefined ? "text-primary" : "text-foreground"
+                          }`}
+                        >
+                          {formatPrice(finalPrice)}
+                        </div>
+                      </div>
+                      {specList.length > 0 && (
+                        <ul className="text-sm text-muted-foreground">
+                          {specList.map((s, idx) => (
+                            <li key={idx}>• {s}</li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="mt-auto flex">
+                        <Link
+                          href={`/pc-k/${pc.slug}`}
+                          className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 hover:scale-105 transition"
+                        >
+                          Megnézem
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
                 <Link
-                  href="/pc-k/osszes"
-                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  href={buildPageHref(Math.max(1, currentPage - 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === 1
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === 1}
                 >
-                  Összes PC megtekintése
+                  Előző
+                </Link>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </div>
+                <Link
+                  href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === totalPages
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === totalPages}
+                >
+                  Következő
                 </Link>
               </div>
             )}
-            {sortedPcs.map((pc, idx) => {
-              const firstImage = pc.images?.[0]?.url;
-              const specs = pc.specs || {};
-              const specList = [specs.processor, specs.gpu, specs.memory, specs.ssd].filter(Boolean).slice(0, 3);
-              const discounts = Array.isArray(pc.discounts) ? pc.discounts : [];
-              const basePrice = typeof pc.priceHuf === "number" ? pc.priceHuf : undefined;
-              const bestDiscount =
-                basePrice && discounts.length
-                  ? discounts
-                      .map((d) => {
-                        if (!d || typeof d.amount !== "number") return 0;
-                        if (d.type === "percent") return Math.round(basePrice * d.amount * 0.01);
-                        if (d.type === "fixed") return d.amount;
-                        return 0;
-                      })
-                      .filter((v) => v > 0)
-                      .sort((a, b) => b - a)[0] ?? 0
-                  : 0;
-              const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
-              const invalidDiscount =
-                (typeof computedFinal === "number" && computedFinal < 0) || pc.invalidDiscount || false;
-              const finalPrice =
-                !invalidDiscount && typeof computedFinal === "number"
-                  ? computedFinal
-                  : typeof pc.finalPriceHuf === "number"
-                    ? pc.finalPriceHuf
-                    : basePrice;
-              const compareAt =
-                !invalidDiscount && typeof finalPrice === "number" && bestDiscount > 0
-                  ? basePrice
-                  : typeof pc.compareAtHuf === "number" && typeof finalPrice === "number" && pc.compareAtHuf > finalPrice
-                    ? pc.compareAtHuf
-                    : undefined;
-              return (
-                <div
-                  key={`${pc.slug || pc._id || pc.name || "pc"}-${idx}`}
-                  className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
-                >
-                  <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-secondary">
-                    {firstImage ? (
-                      <Image
-                        src={firstImage}
-                        alt={pc.images?.[0]?.alt || pc.name}
-                        fill
-                        className="object-contain bg-white"
-                        sizes="400px"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                        Nincs kép
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-2">
-                    <div className="text-xs uppercase text-primary">{pc.brand}</div>
-                    <h3 className="text-lg font-bold leading-tight text-foreground">
-                      <Link href={`/pc-k/${pc.slug}`} className="hover:text-primary">
-                        {pc.name}
-                      </Link>
-                    </h3>
-                    <div className="flex flex-col gap-1">
-                      {compareAt !== undefined && (
-                        <span className="text-sm font-semibold text-muted-foreground line-through">
-                          {formatPrice(compareAt)}
-                        </span>
-                      )}
-                      <div
-                        className={`text-2xl font-extrabold ${
-                          compareAt !== undefined ? "text-primary" : "text-foreground"
-                        }`}
-                      >
-                        {formatPrice(finalPrice)}
-                      </div>
-                    </div>
-                    {specList.length > 0 && (
-                      <ul className="text-sm text-muted-foreground">
-                        {specList.map((s, idx) => (
-                          <li key={idx}>• {s}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="mt-auto flex">
-                      <Link
-                        href={`/pc-k/${pc.slug}`}
-                        className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 hover:scale-105 transition"
-                      >
-                        Megnézem
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>

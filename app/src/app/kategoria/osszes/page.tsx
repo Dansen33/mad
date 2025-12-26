@@ -277,12 +277,16 @@ function parseSearchParams(search: Record<string, string | string[] | undefined>
     : categoryRaw
       ? [categoryRaw]
       : [];
-  return { brand, condition, q, sort, categories, cpu, memory, gpu, display, storage, priceMax };
+  const page =
+    typeof search.page === "string" && Number.isFinite(Number(search.page)) && Number(search.page) > 0
+      ? Number(search.page)
+      : 1;
+  return { brand, condition, q, sort, categories, cpu, memory, gpu, display, storage, priceMax, page };
 }
 
 export default async function AllProductsPage({ searchParams }: { searchParams: SearchParams }) {
   const qs = await searchParams;
-  const { brand, condition, q, sort, categories, cpu, memory, gpu, display, storage, priceMax } =
+  const { brand, condition, q, sort, categories, cpu, memory, gpu, display, storage, priceMax, page } =
     parseSearchParams(qs);
   const qNoSpace = q ? q.replace(/\s+/g, "") : null;
   const categoryOptions = [
@@ -301,6 +305,7 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
       : sort === "price-desc"
         ? [{ field: "priceHuf", direction: "desc" as const }]
         : [{ field: "_createdAt", direction: "desc" as const }];
+  const pageSize = 9;
 
   const products = await sanityClient.fetch(
     `*[_type=="product"
@@ -425,6 +430,10 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
                 (a, b) =>
                   new Date(b._createdAt || 0).getTime() - new Date(a._createdAt || 0).getTime(),
               );
+  const totalProducts = sortedProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const pageItems = sortedProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const facetRows: FacetRow[] = await sanityClient.fetch(
     `*[_type=="product" && (!defined(stock) || stock > 0)]{
@@ -499,6 +508,28 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
     clearHref: "/kategoria/osszes",
   };
 
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    const append = (key: string, value?: string | number | null) => {
+      if (value === undefined || value === null || value === "") return;
+      params.set(key, String(value));
+    };
+    append("sort", sort);
+    append("q", q);
+    append("brand", brand);
+    append("condition", condition);
+    categories.forEach((cat) => params.append("category", cat));
+    append("cpu", cpu);
+    append("memory", memory);
+    append("gpu", gpu);
+    append("display", display);
+    append("storage", storage);
+    append("priceMax", priceMax);
+    append("page", targetPage);
+    const qs = params.toString();
+    return qs ? `/kategoria/osszes?${qs}` : "/kategoria/osszes";
+  };
+
   return (
     <div className="min-h-screen text-foreground">
       <ProductHeader />
@@ -566,7 +597,7 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
                 sort={sort}
                 params={{ q, brand, categories, cpu, memory, gpu, display, storage, priceMax }}
               />
-              <div className="text-muted-foreground">{sortedProducts.length} találat</div>
+              <div className="text-muted-foreground">{totalProducts} találat</div>
             </div>
           </div>
         </div>
@@ -591,114 +622,145 @@ export default async function AllProductsPage({ searchParams }: { searchParams: 
             <FilterForm key={filterKey} {...filterProps} />
           </aside>
 
-          <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {!sortedProducts.length && (
-              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
-                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
-                <p className="mt-1">
-                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
-                </p>
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {!pageItems.length && (
+                <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                  <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                  <p className="mt-1">
+                    A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                  </p>
+                  <Link
+                    href="/kategoria/osszes"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  >
+                    Összes laptop megtekintése
+                  </Link>
+                </div>
+              )}
+              {pageItems.map((item: ProductHit) => {
+                const firstImage = item.images?.[0]?.url;
+                const discounts = Array.isArray(item.discounts) ? item.discounts : [];
+                const bestDiscount =
+                  discounts
+                    .map((d) => {
+                      if (!d || typeof d.amount !== "number") return 0;
+                      if (d.type === "percent") return Math.round(item.priceHuf * d.amount * 0.01);
+                      if (d.type === "fixed") return d.amount;
+                      return 0;
+                    })
+                    .filter((v) => v > 0)
+                    .sort((a, b) => b - a)[0] ?? 0;
+                const rawFinalPrice = item.priceHuf - bestDiscount;
+                const invalidDiscount = rawFinalPrice < 0 || item.invalidDiscount;
+                const finalPrice = invalidDiscount ? item.priceHuf : rawFinalPrice;
+                const compareAt =
+                  !invalidDiscount && bestDiscount > 0
+                    ? item.priceHuf
+                    : typeof item.compareAtHuf === "number" && item.compareAtHuf > finalPrice
+                      ? item.compareAtHuf
+                      : undefined;
+                const specs = item.specs || {};
+                const specList = [
+                  specs.processor,
+                  specs.memory,
+                  specs.storage,
+                  specs.gpu,
+                  specs.display,
+                ].filter(Boolean) as string[];
+
+                return (
+                  <div
+                    key={item._id || item.slug}
+                    className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
+                  >
+                    <Link
+                      href={`/termek/${item.slug}`}
+                      className="block overflow-hidden rounded-lg border border-border"
+                    >
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          fill
+                          src={
+                            firstImage ||
+                            "https://dummyimage.com/600x400/0f1320/ffffff&text=wellcomp"
+                          }
+                          alt={item.name}
+                          className="object-contain bg-white transition duration-300 hover:scale-105"
+                          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 80vw"
+                          unoptimized
+                        />
+                      </div>
+                    </Link>
+                    <div className="flex flex-col gap-1">
+                      <Link
+                        href={`/termek/${item.slug}`}
+                        className="font-semibold hover:text-primary"
+                      >
+                        {item.name}
+                      </Link>
+                      <div className="flex flex-col items-start gap-1">
+                        {compareAt && (
+                          <span className="text-sm font-semibold text-muted-foreground line-through">
+                            {new Intl.NumberFormat("hu-HU").format(compareAt)} Ft
+                          </span>
+                        )}
+                        <span
+                          className={`text-2xl font-extrabold ${compareAt ? "text-primary" : "text-foreground"}`}
+                        >
+                          {new Intl.NumberFormat("hu-HU").format(finalPrice)} Ft
+                        </span>
+                      </div>
+                    </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {item.shortDescription}
+                  </p>
+                    {specList.length > 0 && (
+                      <ul className="list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                        {specList.slice(0, 5).map((s) => (
+                          <li key={s}>{s}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <Link
+                      href={`/termek/${item.slug}`}
+                      className="mt-auto inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
+                    >
+                      Megnézem
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
                 <Link
-                  href="/kategoria/osszes"
-                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  href={buildPageHref(Math.max(1, currentPage - 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === 1
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === 1}
                 >
-                  Összes laptop megtekintése
+                  Előző
+                </Link>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </div>
+                <Link
+                  href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === totalPages
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === totalPages}
+                >
+                  Következő
                 </Link>
               </div>
             )}
-            {sortedProducts.map((item: ProductHit) => {
-              const firstImage = item.images?.[0]?.url;
-              const discounts = Array.isArray(item.discounts) ? item.discounts : [];
-              const bestDiscount =
-                discounts
-                  .map((d) => {
-                    if (!d || typeof d.amount !== "number") return 0;
-                    if (d.type === "percent") return Math.round(item.priceHuf * d.amount * 0.01);
-                    if (d.type === "fixed") return d.amount;
-                    return 0;
-                  })
-                  .filter((v) => v > 0)
-                  .sort((a, b) => b - a)[0] ?? 0;
-              const rawFinalPrice = item.priceHuf - bestDiscount;
-              const invalidDiscount = rawFinalPrice < 0 || item.invalidDiscount;
-              const finalPrice = invalidDiscount ? item.priceHuf : rawFinalPrice;
-              const compareAt =
-                !invalidDiscount && bestDiscount > 0
-                  ? item.priceHuf
-                  : typeof item.compareAtHuf === "number" && item.compareAtHuf > finalPrice
-                    ? item.compareAtHuf
-                    : undefined;
-              const specs = item.specs || {};
-              const specList = [
-                specs.processor,
-                specs.memory,
-                specs.storage,
-                specs.gpu,
-                specs.display,
-              ].filter(Boolean) as string[];
-
-              return (
-                <div
-                  key={item._id || item.slug}
-                  className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
-                >
-                  <Link
-                    href={`/termek/${item.slug}`}
-                    className="block overflow-hidden rounded-lg border border-border"
-                  >
-                    <div className="relative aspect-square w-full">
-                      <Image
-                        fill
-                        src={
-                          firstImage ||
-                          "https://dummyimage.com/600x400/0f1320/ffffff&text=wellcomp"
-                        }
-                      alt={item.name}
-                      className="object-contain bg-white transition duration-300 hover:scale-105"
-                      sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 80vw"
-                      unoptimized
-                    />
-                    </div>
-                  </Link>
-                  <div className="flex flex-col gap-1">
-                    <Link
-                      href={`/termek/${item.slug}`}
-                      className="font-semibold hover:text-primary"
-                    >
-                      {item.name}
-                    </Link>
-                    <div className="flex flex-col items-start gap-1">
-                      {compareAt && (
-                        <span className="text-sm font-semibold text-muted-foreground line-through">
-                          {new Intl.NumberFormat("hu-HU").format(compareAt)} Ft
-                        </span>
-                      )}
-                      <span
-                        className={`text-2xl font-extrabold ${compareAt ? "text-primary" : "text-foreground"}`}
-                      >
-                        {new Intl.NumberFormat("hu-HU").format(finalPrice)} Ft
-                      </span>
-                    </div>
-                  </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {item.shortDescription}
-                </p>
-                  {specList.length > 0 && (
-                    <ul className="list-disc space-y-1 pl-4 text-xs text-muted-foreground">
-                      {specList.slice(0, 5).map((s) => (
-                        <li key={s}>{s}</li>
-                      ))}
-                    </ul>
-                  )}
-                  <Link
-                    href={`/termek/${item.slug}`}
-                    className="mt-auto inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
-                  >
-                    Megnézem
-                  </Link>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>

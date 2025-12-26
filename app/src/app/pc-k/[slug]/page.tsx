@@ -1,13 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { sanityClient } from "@/lib/sanity";
 import { ProductHeader } from "@/components/product-header";
 import { SiteFooter } from "@/components/site-footer";
-import { AddToCartButton } from "@/components/add-to-cart-button";
-import { UpgradePicker } from "@/components/upgrade-picker";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { ViewContentTracker } from "@/components/view-content-tracker";
+import { PcImageUpgrades } from "@/components/pc-image-upgrades";
+import { UpgradePicker } from "@/components/upgrade-picker";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -31,6 +31,8 @@ type PcData = {
   memoryUpgradeGroup?: "ddr4" | "ddr5";
   allowSsdUpgrades?: boolean;
   allowWifiUpgrades?: boolean;
+  allowCaseUpgrades?: boolean;
+  allowedCaseOptions?: string[];
   shortDescription?: string;
   info?: string;
   note?: string;
@@ -55,6 +57,7 @@ type UpgradePricing = {
   ddr5Options?: { label: string; deltaHuf: number }[];
   ssdOptions?: { label: string; deltaHuf: number }[];
   wifiOptions?: { label: string; deltaHuf: number }[];
+  caseOptions?: { label: string; deltaHuf: number; image?: string | null }[];
 };
 
 async function fetchPc(slug: string) {
@@ -73,6 +76,8 @@ async function fetchPc(slug: string) {
       memoryUpgradeGroup,
       allowSsdUpgrades,
       allowWifiUpgrades,
+      allowCaseUpgrades,
+      allowedCaseOptions,
       shortDescription,
       info,
       note,
@@ -140,7 +145,8 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
       ddr4Options[]{label,deltaHuf},
       ddr5Options[]{label,deltaHuf},
       ssdOptions[]{label,deltaHuf},
-      wifiOptions[]{label,deltaHuf}
+      wifiOptions[]{label,deltaHuf},
+      caseOptions[]{label,deltaHuf,"image": image.asset->url}
     }`,
   );
   const pricingSafe: UpgradePricing = {
@@ -148,6 +154,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
     ddr5Options: pricing?.ddr5Options ?? [],
     ssdOptions: pricing?.ssdOptions ?? [],
     wifiOptions: pricing?.wifiOptions ?? [],
+    caseOptions: pricing?.caseOptions ?? [],
   };
 
   const images = pc.images?.length
@@ -218,34 +225,71 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
           <span className="text-foreground">{pc.name}</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1.1fr] md:items-stretch">
-          <div className="space-y-3">
-            <div className="relative w-full overflow-hidden rounded-2xl border border-border min-h-[710px]">
-              <Image
-                fill
-                src={images[0].url}
-                alt={images[0].alt || pc.name}
-                className="object-contain bg-white"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                unoptimized
-              />
-            </div>
-            {images.length > 1 && (
-              <div className="grid grid-cols-3 gap-3">
-                {images.slice(1).map((img) => (
-                  <div key={img.url} className="relative h-24 overflow-hidden rounded-xl border border-border">
-                    <Image
-                      fill
-                      src={img.url}
-                      alt={img.alt || pc.name}
-                      className="object-contain bg-white"
-                      sizes="200px"
-                      unoptimized
-                    />
-                  </div>
-                ))}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1.1fr] md:items-start">
+          <div className="space-y-4">
+            <PcImageUpgrades
+              images={images}
+              pcSlug={pc.slug}
+              pcName={pc.name}
+              basePrice={typeof finalPrice === "number" ? finalPrice : basePrice ?? 0}
+              allowMemoryUpgrades={pc.allowMemoryUpgrades}
+              memoryOptions={
+                pc.allowMemoryUpgrades
+                  ? pc.memoryUpgradeGroup === "ddr5"
+                    ? pricingSafe.ddr5Options
+                    : pricingSafe.ddr4Options
+                  : []
+              }
+              allowSsdUpgrades={pc.allowSsdUpgrades}
+              ssdOptions={pc.allowSsdUpgrades ? pricingSafe.ssdOptions : []}
+              allowWifiUpgrades={pc.allowWifiUpgrades}
+              wifiOptions={pc.allowWifiUpgrades ? pricingSafe.wifiOptions : []}
+              caseOptions={
+                pc.allowCaseUpgrades
+                  ? Array.isArray(pc.allowedCaseOptions) && pc.allowedCaseOptions.length
+                    ? (pricingSafe.caseOptions ?? []).filter((c) => pc.allowedCaseOptions?.includes(c.label))
+                    : pricingSafe.caseOptions ?? []
+                  : []
+              }
+            />
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+                <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {shippingLabels[pc.shippingTime ?? ""] || pc.shippingTime || "—"}
+                </div>
               </div>
-            )}
+              <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+                <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {warrantyLabels[pc.warranty ?? ""] || pc.warranty || "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
+              {pc.info ? (
+                <div className="text-sm font-semibold text-foreground whitespace-pre-line">{pc.info}</div>
+              ) : (
+                <div className="space-y-1 text-sm font-semibold text-foreground whitespace-pre-line">
+                  <div>
+                    Személyre szabható konfiguráció, egyéni kérés esetén kérjük vegye fel velünk a{" "}
+                    <Link href="/kapcsolat" className="text-primary hover:text-primary/80">
+                      kapcsolatot
+                    </Link>
+                    .
+                  </div>
+                  <div className="text-xs font-normal text-muted-foreground">A kép csak illusztráció.</div>
+                </div>
+              )}
+              {pc.note && (
+                <div className="mt-3 rounded-lg border border-border bg-card p-3 text-sm font-semibold text-foreground whitespace-pre-line shadow-sm">
+                  {pc.note}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4 rounded-2xl border border-border bg-card p-6 pb-10 shadow-2xl shadow-black/30">
@@ -275,7 +319,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
               )}
             </div>
 
-            {pc.allowMemoryUpgrades || pc.allowSsdUpgrades || pc.allowWifiUpgrades ? (
+            {pc.allowMemoryUpgrades || pc.allowSsdUpgrades || pc.allowWifiUpgrades || pc.allowCaseUpgrades ? (
               <UpgradePicker
                 productSlug={pc.slug}
                 productName={pc.name}
@@ -287,50 +331,19 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                       : pricingSafe.ddr4Options
                     : []
                 }
-                ssdOptions={pc.allowSsdUpgrades ? pricingSafe.ssdOptions : []}
-                wifiOptions={pc.allowWifiUpgrades ? pricingSafe.wifiOptions : []}
-                disabled={pc.stock !== undefined && pc.stock <= 0}
-              />
+              ssdOptions={pc.allowSsdUpgrades ? pricingSafe.ssdOptions : []}
+              wifiOptions={pc.allowWifiUpgrades ? pricingSafe.wifiOptions : []}
+              caseOptions={
+                pc.allowCaseUpgrades
+                  ? Array.isArray(pc.allowedCaseOptions) && pc.allowedCaseOptions.length
+                    ? (pricingSafe.caseOptions ?? []).filter((c) => pc.allowedCaseOptions?.includes(c.label))
+                    : pricingSafe.caseOptions ?? []
+                  : []
+              }
+              disabled={pc.stock !== undefined && pc.stock <= 0}
+            />
             ) : (
               <AddToCartButton productSlug={pc.slug} productName={pc.name} />
-            )}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
-                <div className="text-sm font-semibold text-foreground">
-                  {shippingLabels[pc.shippingTime ?? ""] || pc.shippingTime || "—"}
-                </div>
-              </div>
-              <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
-                <div className="text-sm font-semibold text-foreground">
-                  {warrantyLabels[pc.warranty ?? ""] || pc.warranty || "—"}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border bg-secondary p-3">
-              <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
-              {pc.info ? (
-                <div className="text-sm font-semibold text-foreground whitespace-pre-line">{pc.info}</div>
-              ) : (
-                <div className="space-y-1 text-sm font-semibold text-foreground whitespace-pre-line">
-                  <div>
-                    Személyre szabható konfiguráció, egyéni kérés esetén kérjük vegye fel velünk a{" "}
-                    <Link href="/kapcsolat" className="text-primary hover:text-primary/80">
-                      kapcsolatot
-                    </Link>
-                    .
-                  </div>
-                  <div className="text-xs font-normal text-muted-foreground">A kép csak illusztráció.</div>
-                </div>
-              )}
-            </div>
-            {pc.note && (
-              <div className="rounded-xl border border-border bg-secondary p-3">
-                <div className="text-xs uppercase tracking-wide text-primary">Megjegyzés</div>
-                <div className="text-sm font-semibold text-foreground whitespace-pre-line">{pc.note}</div>
-              </div>
             )}
           </div>
         </div>

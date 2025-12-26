@@ -241,10 +241,15 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
   const q = typeof params.q === "string" ? params.q : "";
   const priceMin = params.priceMin ? Number(params.priceMin) : undefined;
   const priceMax = params.priceMax ? Number(params.priceMax) : undefined;
+  const page =
+    typeof params.page === "string" && Number.isFinite(Number(params.page)) && Number(params.page) > 0
+      ? Number(params.page)
+      : 1;
 
   const qNoSpace = q ? q.replace(/\s+/g, "") : "";
 
   const orderBy = [{ field: "_createdAt", direction: "desc" }];
+  const pageSize = 9;
 
   const phones: PhoneHit[] = await sanityClient.fetch(
     `*[_type=="phone" && (!defined(stock) || stock > 0)
@@ -375,6 +380,10 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
                 (a, b) =>
                   new Date(b._createdAt || 0).getTime() - new Date(a._createdAt || 0).getTime(),
               );
+  const totalPhones = sortedPhones.length;
+  const totalPages = Math.max(1, Math.ceil(totalPhones / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const pageItems = sortedPhones.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const facetRows: FacetRow[] = await sanityClient.fetch(
     `*[_type=="phone" && (!defined(stock) || stock > 0)]{
@@ -450,6 +459,28 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
     clearHref: "/telefonok/osszes",
   };
 
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    const append = (key: string, value?: string | number | null) => {
+      if (value === undefined || value === null || value === "") return;
+      params.set(key, String(value));
+    };
+    append("sort", sort);
+    append("brand", brand);
+    append("condition", condition);
+    append("q", q);
+    append("soc", soc);
+    append("memory", memory);
+    append("storage", storage);
+    append("display", display);
+    append("os", os);
+    append("priceMin", priceMin);
+    append("priceMax", priceMax);
+    append("page", targetPage);
+    const qs = params.toString();
+    return qs ? `/telefonok/osszes?${qs}` : "/telefonok/osszes";
+  };
+
   const conditionLabelMap: Record<string, string> = { UJ: "Új", FELUJITOTT: "Felújított" };
   const conditionLabel = condition ? conditionLabelMap[condition] || condition : null;
   const hasFilters = Boolean(brand || condition || q || soc || memory || storage || display || os || priceMin || priceMax);
@@ -491,7 +522,7 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
                 params={{ brand, q, soc, memory, storage, display, os, priceMin, priceMax }}
                 id="sort-select-phone"
               />
-              <div className="text-muted-foreground">{sortedPhones.length} találat</div>
+              <div className="text-muted-foreground">{totalPhones} találat</div>
             </div>
           </div>
         </div>
@@ -513,118 +544,149 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
             <FilterForm key={filterKey} {...filterProps} />
           </aside>
 
-          <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {!sortedPhones.length && (
-              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
-                <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
-                <p className="mt-1">
-                  A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
-                </p>
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {!pageItems.length && (
+                <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-lg shadow-black/20">
+                  <div className="text-lg font-bold text-foreground">Sajnáljuk, nincs találat.</div>
+                  <p className="mt-1">
+                    A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
+                  </p>
+                  <Link
+                    href="/telefonok/osszes"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  >
+                    Összes telefon megtekintése
+                  </Link>
+                </div>
+              )}
+              {pageItems.map((phone) => {
+                const firstImage = phone.images?.[0]?.url;
+                const specs = phone.specs || {};
+                const specList = [specs.soc, specs.memory, specs.storage, specs.display].filter(Boolean).slice(0, 3);
+                const discounts = Array.isArray(phone.discounts) ? phone.discounts : [];
+                const basePrice = typeof phone.priceHuf === "number" ? phone.priceHuf : undefined;
+                const bestDiscount =
+                  basePrice && discounts.length
+                    ? discounts
+                        .map((d) => {
+                          if (!d || typeof d.amount !== "number") return 0;
+                          if (d.type === "percent") return Math.round(basePrice * d.amount * 0.01);
+                          if (d.type === "fixed") return d.amount;
+                          return 0;
+                        })
+                        .filter((v) => v > 0)
+                        .sort((a, b) => b - a)[0] ?? 0
+                    : 0;
+                const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
+                const invalidDiscount =
+                  (typeof computedFinal === "number" && computedFinal < 0) || phone.invalidDiscount || false;
+                const finalPrice =
+                  !invalidDiscount && typeof computedFinal === "number"
+                    ? computedFinal
+                    : typeof phone.finalPriceHuf === "number"
+                      ? phone.finalPriceHuf
+                      : basePrice;
+                const compareAt =
+                  !invalidDiscount && typeof finalPrice === "number" && bestDiscount > 0
+                    ? basePrice
+                    : typeof phone.compareAtHuf === "number" && typeof finalPrice === "number" && phone.compareAtHuf > finalPrice
+                      ? phone.compareAtHuf
+                      : undefined;
+                return (
+                  <div
+                    key={phone.slug || phone._id || phone.name}
+                    className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
+                  >
+                    <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-secondary">
+                      {firstImage ? (
+                        <Image
+                          src={firstImage}
+                          alt={phone.images?.[0]?.alt || phone.name}
+                          fill
+                          className="object-contain bg-white"
+                          sizes="400px"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                          Nincs kép
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="text-xs uppercase text-primary">{phone.brand}</div>
+                      <h3 className="text-lg font-bold leading-tight text-foreground">
+                        <Link href={`/telefonok/${phone.slug}`} className="hover:text-primary">
+                          {phone.name}
+                        </Link>
+                      </h3>
+                      <div className="flex flex-col gap-1">
+                        {compareAt !== undefined && (
+                          <span className="text-sm font-semibold text-muted-foreground line-through">
+                            {formatPrice(compareAt)}
+                          </span>
+                        )}
+                        <div
+                          className={`text-2xl font-extrabold ${
+                            compareAt !== undefined ? "text-primary" : "text-foreground"
+                          }`}
+                        >
+                          {formatPrice(finalPrice)}
+                        </div>
+                      </div>
+                      {specList.length > 0 && (
+                        <ul className="text-sm text-muted-foreground">
+                          {specList.map((s, idx) => (
+                            <li key={idx}>• {s}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {phone.shortDescription && (
+                        <div className="text-sm text-muted-foreground line-clamp-2">{phone.shortDescription}</div>
+                      )}
+                      <div className="mt-auto flex">
+                        <Link
+                          href={`/telefonok/${phone.slug}`}
+                          className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 hover:scale-105 transition"
+                        >
+                          Megnézem
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
                 <Link
-                  href="/telefonok/osszes"
-                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
+                  href={buildPageHref(Math.max(1, currentPage - 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === 1
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === 1}
                 >
-                  Összes telefon megtekintése
+                  Előző
+                </Link>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </div>
+                <Link
+                  href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === totalPages
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === totalPages}
+                >
+                  Következő
                 </Link>
               </div>
             )}
-            {sortedPhones.map((phone) => {
-              const firstImage = phone.images?.[0]?.url;
-              const specs = phone.specs || {};
-              const specList = [specs.soc, specs.memory, specs.storage, specs.display].filter(Boolean).slice(0, 3);
-              const discounts = Array.isArray(phone.discounts) ? phone.discounts : [];
-              const basePrice = typeof phone.priceHuf === "number" ? phone.priceHuf : undefined;
-              const bestDiscount =
-                basePrice && discounts.length
-                  ? discounts
-                      .map((d) => {
-                        if (!d || typeof d.amount !== "number") return 0;
-                        if (d.type === "percent") return Math.round(basePrice * d.amount * 0.01);
-                        if (d.type === "fixed") return d.amount;
-                        return 0;
-                      })
-                      .filter((v) => v > 0)
-                      .sort((a, b) => b - a)[0] ?? 0
-                  : 0;
-              const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
-              const invalidDiscount =
-                (typeof computedFinal === "number" && computedFinal < 0) || phone.invalidDiscount || false;
-              const finalPrice =
-                !invalidDiscount && typeof computedFinal === "number"
-                  ? computedFinal
-                  : typeof phone.finalPriceHuf === "number"
-                    ? phone.finalPriceHuf
-                    : basePrice;
-              const compareAt =
-                !invalidDiscount && typeof finalPrice === "number" && bestDiscount > 0
-                  ? basePrice
-                  : typeof phone.compareAtHuf === "number" && typeof finalPrice === "number" && phone.compareAtHuf > finalPrice
-                    ? phone.compareAtHuf
-                    : undefined;
-              return (
-                <div
-                  key={phone.slug || phone._id || phone.name}
-                  className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
-                >
-                  <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-secondary">
-                    {firstImage ? (
-                      <Image
-                        src={firstImage}
-                        alt={phone.images?.[0]?.alt || phone.name}
-                        fill
-                        className="object-contain bg-white"
-                        sizes="400px"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                        Nincs kép
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-2">
-                    <div className="text-xs uppercase text-primary">{phone.brand}</div>
-                    <h3 className="text-lg font-bold leading-tight text-foreground">
-                      <Link href={`/telefonok/${phone.slug}`} className="hover:text-primary">
-                        {phone.name}
-                      </Link>
-                    </h3>
-                    <div className="flex flex-col gap-1">
-                      {compareAt !== undefined && (
-                        <span className="text-sm font-semibold text-muted-foreground line-through">
-                          {formatPrice(compareAt)}
-                        </span>
-                      )}
-                      <div
-                        className={`text-2xl font-extrabold ${
-                          compareAt !== undefined ? "text-primary" : "text-foreground"
-                        }`}
-                      >
-                        {formatPrice(finalPrice)}
-                      </div>
-                    </div>
-                    {specList.length > 0 && (
-                      <ul className="text-sm text-muted-foreground">
-                        {specList.map((s, idx) => (
-                          <li key={idx}>• {s}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {phone.shortDescription && (
-                      <div className="text-sm text-muted-foreground line-clamp-2">{phone.shortDescription}</div>
-                    )}
-                    <div className="mt-auto flex">
-                      <Link
-                        href={`/telefonok/${phone.slug}`}
-                        className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 hover:scale-105 transition"
-                      >
-                        Megnézem
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>
