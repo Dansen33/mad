@@ -60,6 +60,13 @@ type UpgradePricing = {
   caseOptions?: { label: string; deltaHuf: number; image?: string | null }[];
 };
 
+const deriveCategoryFromPrice = (price?: number | null) => {
+  if (typeof price !== "number" || !Number.isFinite(price)) return null;
+  if (price < 300000) return "gamer-pc-olcso-300-alatt";
+  if (price < 600000) return "gamer-pc-300-600";
+  return "gamer-pc-600-felett";
+};
+
 async function fetchPc(slug: string) {
   return sanityClient.fetch<PcData | null>(
     `*[_type=="pc" && slug.current==$slug][0]{
@@ -207,6 +214,9 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
     typeof finalPrice === "number"
       ? `${new Intl.NumberFormat("hu-HU").format(finalPrice)} Ft`
       : "Árért érdeklődj";
+  const effectivePriceNumber = typeof finalPrice === "number" ? finalPrice : basePrice;
+  const derivedCategory = deriveCategoryFromPrice(effectivePriceNumber);
+  const pcCategory = pc.category || derivedCategory;
 
   return (
     <div className="min-h-screen text-foreground">
@@ -253,7 +263,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
               }
             />
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="hidden grid-cols-1 gap-3 sm:grid-cols-2 md:grid">
               <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
                 <div className="text-sm font-semibold text-foreground">
@@ -268,7 +278,7 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+            <div className="hidden rounded-xl border border-border bg-card p-3 shadow-sm md:block">
               <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
               {pc.info ? (
                 <div className="text-sm font-semibold text-foreground whitespace-pre-line">{pc.info}</div>
@@ -300,9 +310,9 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
                   {conditionLabels[pc.condition] || pc.condition}
                 </span>
               )}
-              {pc.category && (
+              {pcCategory && (
                 <span className="rounded-full bg-primary/15 px-3 py-1">
-                  {categoryLabels[pc.category] || pc.category}
+                  {categoryLabels[pcCategory] || pcCategory}
                 </span>
               )}
             </div>
@@ -345,6 +355,38 @@ export default async function PcPage({ params }: { params: Promise<{ slug: strin
             ) : (
               <AddToCartButton productSlug={pc.slug} productName={pc.name} />
             )}
+          </div>
+        </div>
+
+        {/* Mobilon: info blokk a specifikációk elé, az add-to-cart után */}
+        <div className="md:hidden rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+          <h2 className="mb-3 text-lg font-bold text-foreground">Információk, szállítás, garancia</h2>
+          <div className="space-y-3 text-sm text-foreground">
+            <div className="rounded-xl border border-border bg-secondary p-3">
+              <div className="text-xs uppercase tracking-wide text-primary">Szállítás</div>
+              <div className="text-sm font-semibold text-foreground">
+                {shippingLabels[pc.shippingTime ?? ""] || pc.shippingTime || "—"}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-secondary p-3">
+              <div className="text-xs uppercase tracking-wide text-primary">Garancia</div>
+              <div className="text-sm font-semibold text-foreground">
+                {warrantyLabels[pc.warranty ?? ""] || pc.warranty || "—"}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-secondary p-3">
+              <div className="text-xs uppercase tracking-wide text-primary">Információ</div>
+              <div className="mt-1 whitespace-pre-line text-muted-foreground">
+                {pc.info || pc.note || ""}                   
+                <div className="text-black">
+                    {" Személyre szabható konfiguráció, egyéni kérés esetén kérjük vegye fel velünk a "}
+                    <Link href="/kapcsolat" className="text-primary hover:text-primary/80">
+                      kapcsolatot
+                    </Link>
+                  </div>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">A kép csak illusztráció.</div>
+            </div>
           </div>
         </div>
 

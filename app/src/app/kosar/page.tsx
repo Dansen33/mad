@@ -8,6 +8,7 @@ type CartItem = {
   slug: string;
   name: string;
   brand: string;
+  _type?: "product" | "pc" | "phone" | "console";
   priceHuf: number;
   quantity: number;
   image?: string | null;

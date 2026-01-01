@@ -12,7 +12,7 @@ export const revalidate = 0;
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-type PcHit = {
+type ConsoleHit = {
   _id?: string;
   slug: string;
   name: string;
@@ -24,37 +24,30 @@ type PcHit = {
   featured?: boolean;
   _createdAt?: string;
   brand?: string;
+  condition?: string;
+  platform?: string;
+  model?: string;
   stock?: number;
-  category?: string;
   shortDescription?: string;
   info?: string;
-  note?: string;
   specs?: {
-    processor?: string;
-    cooler?: string;
-    motherboard?: string;
-    memory?: string;
+    cpu?: string;
     gpu?: string;
-    ssd?: string;
-    case?: string;
-    psu?: string;
-    wifi?: string;
-    bluetooth?: string;
-    os?: string;
+    memory?: string;
+    storage?: string;
+    resolution?: string;
   };
   images?: { url: string; alt?: string | null }[];
-  autoCategory?: string | null;
 };
 
 type FacetRow = {
   brand?: string;
   condition?: string;
-  category?: string;
+  platform?: string;
+  model?: string;
   specs?: {
-    processor?: string;
     memory?: string;
-    gpu?: string;
-    ssd?: string;
+    storage?: string;
   };
 };
 
@@ -62,59 +55,39 @@ type FilterFormProps = {
   sort: string;
   brand?: string;
   condition?: string;
+  platform?: string;
+  model?: string;
   q?: string;
-  category?: string;
-  cpu?: string;
-  memory?: string;
-  gpu?: string;
-  ssd?: string;
   priceMin?: number;
   priceMax?: number;
   ceilPrice: number;
   brands: string[];
-  conditionOptions: { value: string; label: string }[];
-  categories: string[];
-  cpus: string[];
-  memories: string[];
-  gpus: string[];
-  ssds: string[];
+  platforms: string[];
+  models: string[];
+  conditions: { value: string; label: string }[];
 };
 
-const categoryLabelMap: Record<string, string> = {
-  "gamer-pc-olcso-300-alatt": "Belépő kategóriás Gamer PC 300.000 Ft-ig",
-  "gamer-pc-300-600": "Középkategóriás Gamer PC 300.000-600.000 Ft-ig",
-  "gamer-pc-600-felett": "Felsőkategóriás Gamer PC 600.000 Ft-tól",
-  "professzionalis-munkaallomas": "Professzionális Munkaállomások",
-  "felujitott-gamer-pc": "Felújított Gamer PC",
-};
-
-const deriveCategoryFromPrice = (price?: number | null) => {
-  if (typeof price !== "number" || !Number.isFinite(price)) return null;
-  if (price < 300000) return "gamer-pc-olcso-300-alatt";
-  if (price < 600000) return "gamer-pc-300-600";
-  return "gamer-pc-600-felett";
+const platformLabels: Record<string, string> = {
+  playstation: "Playstation",
+  xbox: "Xbox",
+  nintendo: "Nintendo",
+  kezikonzolok: "Kézikonzolok",
 };
 
 function FilterForm({
   sort,
   brand,
   condition,
+  platform,
+  model,
   q,
-  category,
-  cpu,
-  memory,
-  gpu,
-  ssd,
   priceMin,
   priceMax,
   ceilPrice,
   brands,
-  conditionOptions,
-  categories,
-  cpus,
-  memories,
-  gpus,
-  ssds,
+  platforms,
+  models,
+  conditions,
 }: FilterFormProps) {
   return (
     <form className="space-y-4" method="get">
@@ -143,7 +116,7 @@ function FilterForm({
         <FilterSelect
           name="condition"
           label="Állapot"
-          options={conditionOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+          options={conditions.map((opt) => ({ value: opt.value, label: opt.label }))}
           defaultValue={condition || ""}
         />
       </div>
@@ -158,44 +131,20 @@ function FilterForm({
       <div className="space-y-1">
         <FilterSelect
           name="category"
-          label="Kategória"
+          label="Platform"
           options={[
             { value: "", label: "Összes" },
-            ...categories.map((v) => ({ value: v, label: categoryLabelMap[v] || v })),
+            ...platforms.map((p) => ({ value: p, label: platformLabels[p] || p })),
           ]}
-          defaultValue={category || ""}
+          defaultValue={platform || ""}
         />
       </div>
       <div className="space-y-1">
         <FilterSelect
-          name="cpu"
-          label="Processzor"
-          options={[{ value: "", label: "Összes" }, ...cpus.map((v) => ({ value: v, label: v }))]}
-          defaultValue={cpu || ""}
-        />
-      </div>
-      <div className="space-y-1">
-        <FilterSelect
-          name="memory"
-          label="Memória"
-          options={[{ value: "", label: "Összes" }, ...memories.map((v) => ({ value: v, label: v }))]}
-          defaultValue={memory || ""}
-        />
-      </div>
-      <div className="space-y-1">
-        <FilterSelect
-          name="gpu"
-          label="Grafikus vezérlő"
-          options={[{ value: "", label: "Összes" }, ...gpus.map((v) => ({ value: v, label: v }))]}
-          defaultValue={gpu || ""}
-        />
-      </div>
-      <div className="space-y-1">
-        <FilterSelect
-          name="ssd"
-          label="Háttértár"
-          options={[{ value: "", label: "Összes" }, ...ssds.map((v) => ({ value: v, label: v }))]}
-          defaultValue={ssd || ""}
+          name="model"
+          label="Modell"
+          options={[{ value: "", label: "Összes" }, ...models.map((m) => ({ value: m, label: m }))]}
+          defaultValue={model || ""}
         />
       </div>
       <button
@@ -205,7 +154,7 @@ function FilterForm({
         Szűrés
       </button>
       <Link
-        href="/pc-k/osszes"
+        href="/konzolok/osszes"
         className="block cursor-pointer text-center text-xs font-semibold text-muted-foreground transition duration-150 hover:scale-[1.02] hover:text-primary"
       >
         Szűrők törlése
@@ -220,53 +169,49 @@ function parseSearchParams(search: Record<string, string | string[] | undefined>
   const condition = typeof search.condition === "string" && search.condition ? search.condition : undefined;
   const rawSort = typeof search.sort === "string" ? search.sort : "latest";
   const sort = rawSort === "default" ? "latest" : rawSort;
-  const category = typeof search.category === "string" && search.category ? search.category : undefined;
-  const cpu = typeof search.cpu === "string" && search.cpu ? search.cpu : undefined;
-  const memory = typeof search.memory === "string" && search.memory ? search.memory : undefined;
-  const gpu = typeof search.gpu === "string" && search.gpu ? search.gpu : undefined;
-  const ssd = typeof search.ssd === "string" && search.ssd ? search.ssd : undefined;
+  const platform = typeof search.category === "string" && search.category ? search.category : undefined;
+  const model = typeof search.model === "string" && search.model ? search.model : undefined;
   const priceMin = typeof search.priceMin === "string" && search.priceMin ? Number(search.priceMin) : undefined;
   const priceMax = typeof search.priceMax === "string" && search.priceMax ? Number(search.priceMax) : undefined;
   const page =
     typeof search.page === "string" && Number.isFinite(Number(search.page)) && Number(search.page) > 0
       ? Number(search.page)
       : 1;
-  return { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax, page };
+  return { brand, condition, q, sort, platform, model, priceMin, priceMax, page };
 }
 
-export default async function PcOsszes({ searchParams }: { searchParams: SearchParams }) {
+export default async function ConsoleOsszes({ searchParams }: { searchParams: SearchParams }) {
   const qs = await searchParams;
-  const { brand, condition, q, sort, category, cpu, memory, gpu, ssd, priceMin, priceMax, page } =
-    parseSearchParams(qs);
+  const { brand, condition, q, sort, platform, model, priceMin, priceMax, page } = parseSearchParams(qs);
+  const pageSize = 9;
+  const orderBy =
+    sort === "price-asc"
+      ? [{ field: "finalPriceHuf", direction: "asc" }]
+      : sort === "price-desc"
+        ? [{ field: "finalPriceHuf", direction: "desc" }]
+        : sort === "popular"
+          ? [
+              { field: "featured", direction: "desc" },
+              { field: "_createdAt", direction: "desc" },
+            ]
+          : [{ field: "_createdAt", direction: "desc" }];
   const qNoSpace = q ? q.replace(/\s+/g, "") : "";
 
-  const orderBy = [{ field: "_createdAt", direction: "desc" as const }];
-  const pageSize = 9;
-
-  const pcs: PcHit[] = await sanityClient.fetch(
-    `*[_type=="pc"
+  const consoles: ConsoleHit[] = await sanityClient.fetch(
+    `*[_type=="console"
       && (!defined($brand) || lower(brand)==lower($brand))
       && (!defined($condition) || lower(condition)==lower($condition))
-      && (!defined($cat) || lower(category)==lower($cat) || select(
-        defined(priceHuf) && priceHuf < 300000 => "gamer-pc-olcso-300-alatt",
-        defined(priceHuf) && priceHuf < 600000 => "gamer-pc-300-600",
-        defined(priceHuf) && priceHuf >= 600000 => "gamer-pc-600-felett",
-        ""
-      ) == lower($cat))
-      && (!defined($cpu) || lower(specs.processor)==lower($cpu))
-      && (!defined($memory) || lower(specs.memory)==lower($memory))
-      && (!defined($gpu) || lower(specs.gpu)==lower($gpu))
-      && (!defined($ssd) || lower(specs.ssd)==lower($ssd))
+      && (!defined($platform) || lower(platform)==lower($platform))
+      && (!defined($model) || lower(model)==lower($model))
       && (
         $q=="" ||
         lower(name) match lower($q) ||
         lower(shortDescription) match lower($q) ||
         lower(info) match lower($q) ||
-        lower(note) match lower($q) ||
-        lower(specs.processor) match lower($q) || lower(specs.processor) match lower($qNoSpace) ||
-        lower(specs.memory) match lower($q) || lower(specs.memory) match lower($qNoSpace) ||
+        lower(specs.cpu) match lower($q) || lower(specs.cpu) match lower($qNoSpace) ||
         lower(specs.gpu) match lower($q) || lower(specs.gpu) match lower($qNoSpace) ||
-        lower(specs.ssd) match lower($q) || lower(specs.ssd) match lower($qNoSpace)
+        lower(specs.memory) match lower($q) || lower(specs.memory) match lower($qNoSpace) ||
+        lower(specs.storage) match lower($q) || lower(specs.storage) match lower($qNoSpace)
       )
       && (!defined(stock) || stock > 0)
     ]{
@@ -274,6 +219,22 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
       name,
       "slug": slug.current,
       priceHuf,
+      brand,
+      condition,
+      platform,
+      model,
+      featured,
+      _createdAt,
+      shortDescription,
+      info,
+      specs{
+        cpu,
+        gpu,
+        memory,
+        storage,
+        resolution
+      },
+      "images": images[]{ "url": asset->url, alt },
       // Kedvezmény számítás
       "discounts": *[_type=="discount" && active == true && (!defined(startsAt) || startsAt <= now()) && (!defined(endsAt) || endsAt >= now()) && references(^._id)]|order(amount desc){
         type,
@@ -289,48 +250,21 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
       "discountHuf": coalesce(discountHufs[0], 0),
       "compareAtHuf": priceHuf,
       "finalPriceHuf": priceHuf - coalesce(discountHufs[0], 0),
-      "invalidDiscount": (priceHuf - coalesce(discountHufs[0], 0)) < 0,
-      featured,
-      _createdAt,
-      brand,
-      stock,
-      category,
-      shortDescription,
-      info,
-      note,
-      specs{
-        processor,
-        cooler,
-        motherboard,
-        memory,
-        gpu,
-        ssd,
-        case,
-        psu,
-        wifi,
-        bluetooth,
-        os
-      },
-      "images": images[]{ "url": asset->url, alt }
+      "invalidDiscount": (priceHuf - coalesce(discountHufs[0], 0)) < 0
     }|order(${orderBy.map((o) => `${o.field} ${o.direction}`).join(",")})`,
     {
       brand: brand ?? null,
       condition: condition ?? null,
-      cat: category ?? null,
-      cpu: cpu ?? null,
-      memory: memory ?? null,
-      gpu: gpu ?? null,
-      ssd: ssd ?? null,
+      platform: platform ?? null,
+      model: model ?? null,
       q: q ? `${q}*` : "",
       qNoSpace: qNoSpace ? `${qNoSpace}*` : "",
-      pmin: null,
-      pmax: null,
     },
   );
 
-  const pcsWithEffective = pcs.map((pc) => {
-    const base = typeof pc.priceHuf === "number" ? pc.priceHuf : 0;
-    const discounts = Array.isArray(pc.discounts) ? pc.discounts : [];
+  const consolesWithEffective = consoles.map((item) => {
+    const base = typeof item.priceHuf === "number" ? item.priceHuf : 0;
+    const discounts = Array.isArray(item.discounts) ? item.discounts : [];
     const bestDiscount =
       discounts
         .map((d) => {
@@ -342,46 +276,36 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
         .filter((v) => v > 0)
         .sort((a, b) => b - a)[0] ?? 0;
     const final =
-      pc.invalidDiscount || base - bestDiscount < 0
+      item.invalidDiscount || base - bestDiscount < 0
         ? base
         : Math.max(0, base - bestDiscount);
-    const autoCategory = deriveCategoryFromPrice(final || base);
-    return { ...pc, effectivePrice: final, autoCategory };
+    return { ...item, effectivePrice: final };
   });
 
-  const pcsWithCategory = pcsWithEffective.map((pc) => ({
-    ...pc,
-    category: pc.category || pc.autoCategory || pc.category,
-  }));
-
-  const filteredPcs = pcsWithCategory.filter((pc) => {
-    if (category) {
-      const effectiveCat = pc.category || pc.autoCategory;
-      if (effectiveCat !== category) return false;
-    }
+  const filteredConsoles = consolesWithEffective.filter((item) => {
     if (typeof priceMin === "number" && Number.isFinite(priceMin)) {
-      if (pc.effectivePrice < priceMin) return false;
+      if (item.effectivePrice < priceMin) return false;
     }
     if (typeof priceMax === "number" && Number.isFinite(priceMax)) {
-      if (pc.effectivePrice > priceMax) return false;
+      if (item.effectivePrice > priceMax) return false;
     }
     return true;
   });
 
-  const sortedPcs =
+  const sortedConsoles =
     sort === "price-asc"
-      ? filteredPcs.slice().sort((a, b) => a.effectivePrice - b.effectivePrice)
+      ? filteredConsoles.slice().sort((a, b) => a.effectivePrice - b.effectivePrice)
       : sort === "price-desc"
-        ? filteredPcs.slice().sort((a, b) => b.effectivePrice - a.effectivePrice)
+        ? filteredConsoles.slice().sort((a, b) => b.effectivePrice - a.effectivePrice)
         : sort === "popular"
-          ? filteredPcs
+          ? filteredConsoles
               .slice()
               .sort(
                 (a, b) =>
                   Number(b.featured ?? false) - Number(a.featured ?? false) ||
                   new Date(b._createdAt || 0).getTime() - new Date(a._createdAt || 0).getTime(),
               )
-          : filteredPcs
+          : filteredConsoles
               .slice()
               .sort(
                 (a, b) =>
@@ -389,16 +313,14 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
               );
 
   const facetRows: FacetRow[] = await sanityClient.fetch(
-    `*[_type=="pc" && (!defined(stock) || stock > 0)]{
+    `*[_type=="console" && (!defined(stock) || stock > 0)]{
       brand,
       condition,
-      category,
-      priceHuf,
+      platform,
+      model,
       specs{
-        processor,
         memory,
-        gpu,
-        ssd
+        storage
       }
     }`,
   );
@@ -415,24 +337,15 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
   };
 
   const brands = collect(facetRows, (x) => x.brand);
-  const conditionOptions = ["", ...collect(facetRows, (x) => x.condition)]
+  const platforms = collect(facetRows, (x) => x.platform);
+  const models = collect(facetRows, (x) => x.model);
+  const conditions = ["", ...collect(facetRows, (x) => x.condition)]
     .filter((v, idx, arr) => arr.indexOf(v) === idx)
     .map((v) => ({
       value: v,
       label: v === "" ? "Összes" : v === "UJ" ? "Új" : v === "FELUJITOTT" ? "Felújított" : v,
     }));
-  const categories = Array.from(
-    new Set(
-      pcsWithCategory
-        .map((x) => x.category || x.autoCategory)
-        .filter((v): v is string => typeof v === "string" && v.trim().length > 0),
-    ),
-  ).sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-  const cpus = collect(facetRows, (x) => x.specs?.processor);
-  const memories = collect(facetRows, (x) => x.specs?.memory);
-  const gpus = collect(facetRows, (x) => x.specs?.gpu);
-  const ssds = collect(facetRows, (x) => x.specs?.ssd);
-  const priceValues = pcsWithEffective
+  const priceValues = consolesWithEffective
     .map((x) => x.effectivePrice)
     .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
   const ceilPrice = priceValues.length ? Math.max(...priceValues) : 1000000;
@@ -441,12 +354,9 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
     sort,
     brand || "",
     condition || "",
-    category || "",
+    platform || "",
+    model || "",
     q || "",
-    cpu || "",
-    memory || "",
-    gpu || "",
-    ssd || "",
     priceMin ?? "",
     priceMax ?? "",
   ].join("|");
@@ -454,43 +364,36 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
     sort,
     brand,
     condition,
+    platform,
+    model,
     q,
-    category,
-    cpu,
-    memory,
-    gpu,
-    ssd,
     priceMin,
     priceMax,
     ceilPrice,
     brands,
-    conditionOptions,
-    categories,
-    cpus,
-    memories,
-    gpus,
-    ssds,
+    platforms,
+    models,
+    conditions,
   };
 
-  const categoryTitleMap = categoryLabelMap;
   const conditionLabelMap: Record<string, string> = { UJ: "Új", FELUJITOTT: "Felújított" };
   const conditionLabel = condition ? conditionLabelMap[condition] || condition : null;
-  const baseTitle = category ? categoryTitleMap[category] || "PC" : "Összes PC";
+  const baseTitle = platform ? platformLabels[platform] || "Konzolok" : "Összes konzol";
   let pageTitle = baseTitle;
-  if (brand && category) pageTitle = `${brand} ${baseTitle.toLowerCase()}`;
-  else if (brand) pageTitle = `${brand} PC`;
+  if (brand && platform) pageTitle = `${brand} ${baseTitle.toLowerCase()}`;
+  else if (brand) pageTitle = `${brand} konzol`;
   if (conditionLabel) pageTitle = `${pageTitle} – ${conditionLabel}`;
   const pageSubtitle =
-    category || brand || conditionLabel
+    platform || brand || conditionLabel
       ? "Szűrt találatok a beállított feltételekkel."
-      : "Gamer és munkaállomás konfigurációk szűrőkkel.";
+      : "Konzolok Playstationtől Xboxig, Nintendoig.";
 
   const formatPrice = (value?: number) =>
     typeof value === "number" ? `${new Intl.NumberFormat("hu-HU").format(value)} Ft` : "Árért érdeklődj";
-  const totalPcs = sortedPcs.length;
-  const totalPages = Math.max(1, Math.ceil(totalPcs / pageSize));
+  const total = sortedConsoles.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(Math.max(page, 1), totalPages);
-  const pageItems = sortedPcs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageItems = sortedConsoles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const buildPageHref = (targetPage: number) => {
     const params = new URLSearchParams();
@@ -501,17 +404,14 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
     append("sort", sort);
     append("brand", brand);
     append("condition", condition);
-    append("category", category);
+    append("category", platform);
+    append("model", model);
     append("q", q);
-    append("cpu", cpu);
-    append("memory", memory);
-    append("gpu", gpu);
-    append("ssd", ssd);
     append("priceMin", priceMin);
     append("priceMax", priceMax);
     append("page", targetPage);
     const qs = params.toString();
-    return qs ? `/pc-k/osszes?${qs}` : "/pc-k/osszes";
+    return qs ? `/konzolok/osszes?${qs}` : "/konzolok/osszes";
   };
 
   return (
@@ -523,22 +423,19 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
             Főoldal
           </Link>
           <span>/</span>
-          <span className="text-foreground">PC</span>
+          <span className="text-foreground">Konzolok</span>
         </div>
 
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase text-primary">PC-k</div>
+              <div className="text-xs uppercase text-primary">Konzolok</div>
               <h1 className="text-2xl font-extrabold">{pageTitle}</h1>
               <p className="text-sm text-muted-foreground">{pageSubtitle}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-muted-foreground">
-              <SortSelect
-                sort={sort}
-                params={{ brand, category, q, cpu, memory, gpu, ssd, priceMin, priceMax }}
-              />
-              <div className="text-muted-foreground">{totalPcs} találat</div>
+              <SortSelect sort={sort} params={{ brand, category: platform, model, q, priceMin, priceMax }} />
+              <div className="text-muted-foreground">{total} találat</div>
             </div>
           </div>
         </div>
@@ -569,19 +466,21 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                     A megadott szűrőkre most nem találtunk terméket. Tekintsd meg a teljes kínálatot:
                   </p>
                   <Link
-                    href="/pc-k/osszes"
+                    href="/konzolok/osszes"
                     className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/60"
                   >
-                    Összes PC megtekintése
+                    Összes konzol megtekintése
                   </Link>
                 </div>
               )}
-              {pageItems.map((pc, idx) => {
-                const firstImage = pc.images?.[0]?.url;
-                const specs = pc.specs || {};
-                const specList = [specs.processor, specs.gpu, specs.memory, specs.ssd].filter(Boolean).slice(0, 3);
-                const discounts = Array.isArray(pc.discounts) ? pc.discounts : [];
-                const basePrice = typeof pc.priceHuf === "number" ? pc.priceHuf : undefined;
+              {pageItems.map((item, idx) => {
+                const firstImage = item.images?.[0]?.url;
+                const specs = item.specs || {};
+                const specList = [platformLabels[item.platform || ""] || item.platform, specs.cpu, specs.gpu, specs.storage]
+                  .filter(Boolean)
+                  .slice(0, 3);
+                const discounts = Array.isArray(item.discounts) ? item.discounts : [];
+                const basePrice = typeof item.priceHuf === "number" ? item.priceHuf : undefined;
                 const bestDiscount =
                   basePrice && discounts.length
                     ? discounts
@@ -596,29 +495,29 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                     : 0;
                 const computedFinal = typeof basePrice === "number" ? basePrice - bestDiscount : undefined;
                 const invalidDiscount =
-                  (typeof computedFinal === "number" && computedFinal < 0) || pc.invalidDiscount || false;
+                  (typeof computedFinal === "number" && computedFinal < 0) || item.invalidDiscount || false;
                 const finalPrice =
                   !invalidDiscount && typeof computedFinal === "number"
                     ? computedFinal
-                    : typeof pc.finalPriceHuf === "number"
-                      ? pc.finalPriceHuf
+                    : typeof item.finalPriceHuf === "number"
+                      ? item.finalPriceHuf
                       : basePrice;
                 const compareAt =
                   !invalidDiscount && typeof finalPrice === "number" && bestDiscount > 0
                     ? basePrice
-                    : typeof pc.compareAtHuf === "number" && typeof finalPrice === "number" && pc.compareAtHuf > finalPrice
-                      ? pc.compareAtHuf
+                    : typeof item.compareAtHuf === "number" && typeof finalPrice === "number" && item.compareAtHuf > finalPrice
+                      ? item.compareAtHuf
                       : undefined;
                 return (
                   <div
-                    key={`${pc.slug || pc._id || pc.name || "pc"}-${idx}`}
+                    key={`${item.slug || item._id || item.name || "console"}-${idx}`}
                     className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 transition duration-200 hover:scale-105"
                   >
                     <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-secondary">
                       {firstImage ? (
                         <Image
                           src={firstImage}
-                          alt={pc.images?.[0]?.alt || pc.name}
+                          alt={item.images?.[0]?.alt || item.name}
                           fill
                           className="object-contain bg-white"
                           sizes="400px"
@@ -631,10 +530,12 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                       )}
                     </div>
                     <div className="flex flex-1 flex-col gap-2">
-                      <div className="text-xs uppercase text-primary">{pc.brand}</div>
+                      <div className="text-xs uppercase text-primary">
+                        {[item.brand, platformLabels[item.platform || ""] || item.platform].filter(Boolean).join(" • ")}
+                      </div>
                       <h3 className="text-lg font-bold leading-tight text-foreground">
-                        <Link href={`/pc-k/${pc.slug}`} className="hover:text-primary">
-                          {pc.name}
+                        <Link href={`/konzolok/${item.slug}`} className="hover:text-primary">
+                          {item.name}
                         </Link>
                       </h3>
                       <div className="flex flex-col gap-1">
@@ -660,7 +561,7 @@ export default async function PcOsszes({ searchParams }: { searchParams: SearchP
                       )}
                       <div className="mt-auto flex">
                         <Link
-                          href={`/pc-k/${pc.slug}`}
+                          href={`/konzolok/${item.slug}`}
                           className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 hover:scale-105 transition"
                         >
                           Megnézem

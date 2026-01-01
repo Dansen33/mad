@@ -5,19 +5,21 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const searchQuery = `
-*[_type in ["product","pc","phone"] && (
+*[_type in ["product","pc","phone","console"] && (
   $q=="" ||
   lower(name) match lower($q) ||
   lower(name) match lower($qNoSpace) ||
   lower(shortDescription) match lower($q) ||
   lower(shortDescription) match lower($qNoSpace) ||
   lower(brand) match lower($q) ||
+  lower(platform) match lower($q) ||
   lower(specs.processor) match lower($q) ||
   lower(specs.memory) match lower($q) ||
   lower(specs.storage) match lower($q) ||
   lower(specs.gpu) match lower($q) ||
   lower(specs.soc) match lower($q) ||
   lower(specs.display) match lower($q) ||
+  lower(specs.cpu) match lower($q) ||
   lower(specs.os) match lower($q)
 )]{
   _id,

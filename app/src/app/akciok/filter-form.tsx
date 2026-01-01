@@ -15,7 +15,7 @@ type FacetBucket = {
   ceilPrice: number;
 };
 
-type FacetsByType = Record<"all" | "product" | "pc" | "phone", FacetBucket>;
+type FacetsByType = Record<"all" | "product" | "pc" | "phone" | "console", FacetBucket>;
 
 type FilterFormProps = {
   sort: string;
@@ -61,9 +61,11 @@ export function FilterForm({
       ? "phone"
       : selectedType === "pc"
         ? "pc"
-        : selectedType === "product"
-          ? "product"
-          : "all";
+        : selectedType === "console"
+          ? "console"
+          : selectedType === "product"
+            ? "product"
+            : "all";
 
   const currentFacet = facets[facetKey] || facets.all;
 
@@ -108,6 +110,7 @@ export function FilterForm({
           <option value="product">Laptopok</option>
           <option value="pc">PC</option>
           <option value="phone">Telefonok</option>
+          <option value="console">Konzolok</option>
         </select>
       </div>
       <div className="space-y-1">
@@ -189,7 +192,7 @@ export function FilterForm({
               </select>
             </div>
           </>
-        ) : selectedType === "pc" ? (
+        ) : selectedType === "pc" || selectedType === "console" ? (
           <>
             <div className="space-y-1">
               <label className="text-xs font-semibold uppercase text-muted-foreground">Processzor</label>

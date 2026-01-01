@@ -75,7 +75,7 @@ export default function KapcsolatPage() {
             <div className="rounded-xl border border-border bg-secondary p-4">
               <h3 className="text-sm font-semibold text-foreground">Email</h3>
               <Link className="text-sm text-primary" href="#contact-form">
-                Kapcsolatfelvétel űrlappal
+                info@wellcomp.hu
               </Link>
             </div>
             <div className="rounded-xl border border-border bg-secondary p-4">

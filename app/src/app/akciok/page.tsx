@@ -10,10 +10,12 @@ export const revalidate = 0;
 
 type SaleHit = {
   _id?: string;
-  _type: "product" | "pc" | "phone";
+  _type: "product" | "pc" | "phone" | "console";
   slug: string;
   name: string;
   brand?: string;
+  platform?: string;
+  model?: string;
   priceHuf?: number;
   compareAtHuf?: number;
   finalPriceHuf?: number;
@@ -26,6 +28,7 @@ type SaleHit = {
   images?: { url: string; alt?: string | null }[];
   specs?: {
     processor?: string;
+    cpu?: string;
     memory?: string;
     gpu?: string;
     storage?: string;
@@ -52,6 +55,11 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
   const storage = typeof qs.storage === "string" ? qs.storage : "";
   const display = typeof qs.display === "string" ? qs.display : "";
   const priceMax = typeof qs.priceMax === "string" ? Number(qs.priceMax) : undefined;
+  const page =
+    typeof qs.page === "string" && Number.isFinite(Number(qs.page)) && Number(qs.page) > 0
+      ? Number(qs.page)
+      : 1;
+  const pageSize = 9;
 
   // Az aktív kedvezményekben megadott érintett termékek lekérése
   const items: SaleHit[] = await sanityClient.fetch(
@@ -61,10 +69,13 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
       name,
       "slug": slug.current,
       brand,
+      platform,
+      model,
       priceHuf,
       "images": images[]{ "url": asset->url, alt },
       specs{
         processor,
+        cpu,
         memory,
         gpu,
         storage,
@@ -139,7 +150,8 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
       if (storage && specs.storage && specs.storage.toLowerCase() !== storage.toLowerCase()) return false;
       if (display && specs.display && specs.display.toLowerCase() !== display.toLowerCase()) return false;
     } else {
-      if (cpu && specs.processor && specs.processor.toLowerCase() !== cpu.toLowerCase()) return false;
+      const processor = specs.processor || specs.cpu;
+      if (cpu && processor && processor.toLowerCase() !== cpu.toLowerCase()) return false;
       if (memory && specs.memory && specs.memory.toLowerCase() !== memory.toLowerCase()) return false;
       if (gpu && specs.gpu && specs.gpu.toLowerCase() !== gpu.toLowerCase()) return false;
       if (storage && specs.storage && specs.storage.toLowerCase() !== storage.toLowerCase()) return false;
@@ -156,6 +168,11 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
         ? filtered.slice().sort((a, b) => b.final - a.final)
         : filtered;
 
+  const total = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const pageItems = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const collect = (arr: SaleHit[], pick: (x: SaleHit) => string | undefined) => {
     return Array.from(
       new Set(
@@ -169,7 +186,7 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
   const buildFacets = (source: SaleHit[]) => {
     const brands = collect(source, (x) => x.brand);
     const socs = collect(source, (x) => x.specs?.soc);
-    const cpus = collect(source, (x) => x.specs?.processor);
+    const cpus = collect(source, (x) => x.specs?.processor || x.specs?.cpu);
     const memories = collect(source, (x) => x.specs?.memory);
     const gpus = collect(source, (x) => x.specs?.gpu);
     const storages = collect(source, (x) => x.specs?.storage);
@@ -184,6 +201,7 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
     product: buildFacets(discountedOnly.filter((x) => x._type === "product")),
     pc: buildFacets(discountedOnly.filter((x) => x._type === "pc")),
     phone: buildFacets(discountedOnly.filter((x) => x._type === "phone")),
+    console: buildFacets(discountedOnly.filter((x) => x._type === "console")),
   };
 
   const filterKey = [sort, brand, type, soc, cpu, memory, gpu, storage, display, priceMax ?? ""].join("|");
@@ -191,7 +209,29 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
   const resolveHref = (item: SaleHit) => {
     if (item._type === "pc") return `/pc-k/${item.slug}`;
     if (item._type === "phone") return `/telefonok/${item.slug}`;
+    if (item._type === "console") return `/konzolok/${item.slug}`;
     return `/termek/${item.slug}`;
+  };
+
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    const append = (key: string, value?: string | number) => {
+      if (value === undefined || value === "" || value === null) return;
+      params.set(key, String(value));
+    };
+    append("sort", sort);
+    append("brand", brand);
+    append("type", type);
+    append("soc", soc);
+    append("cpu", cpu);
+    append("memory", memory);
+    append("gpu", gpu);
+    append("storage", storage);
+    append("display", display);
+    append("priceMax", priceMax);
+    append("page", targetPage);
+    const qs = params.toString();
+    return qs ? `/akciok?${qs}` : "/akciok";
   };
 
   return (
@@ -215,17 +255,17 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
                   Minden kedvezményes laptop, PC és telefon egy helyen.
                 </p>
               </div>
-              <div className="text-xs font-semibold text-muted-foreground">{discountedOnly.length} találat</div>
+              <div className="text-xs font-semibold text-muted-foreground">{total} találat</div>
             </div>
           </div>
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="w-full lg:hidden">
-            <details className="rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+            <details className="relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
               <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
                 Szűrők <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
               </summary>
-              <div className="mt-3 border-t border-border pt-3">
+              <div className="relative z-10 mt-3 border-t border-border pt-3">
                 <FilterForm
                   key={filterKey}
                   sort={sort}
@@ -266,8 +306,9 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
             />
           </aside>
 
-          <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {sorted.map((item) => {
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {pageItems.map((item) => {
               const firstImage = item.images?.[0]?.url;
               return (
                 <div
@@ -317,10 +358,40 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
                   </Link>
                 </div>
               );
-            })}
-            {sorted.length === 0 && (
-              <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-                Jelenleg nincs akciós termék.
+              })}
+              {pageItems.length === 0 && (
+                <div className="col-span-full rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+                  Jelenleg nincs akciós termék.
+                </div>
+              )}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <Link
+                  href={buildPageHref(Math.max(1, currentPage - 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === 1
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === 1}
+                >
+                  Előző
+                </Link>
+                <div className="text-sm font-semibold text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </div>
+                <Link
+                  href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                  className={`inline-flex items-center rounded-full border border-border px-3 py-2 text-sm font-semibold transition ${
+                    currentPage === totalPages
+                      ? "cursor-not-allowed text-muted-foreground"
+                      : "hover:border-primary/60 hover:text-primary"
+                  }`}
+                  aria-disabled={currentPage === totalPages}
+                >
+                  Következő
+                </Link>
               </div>
             )}
           </div>

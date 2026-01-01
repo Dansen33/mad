@@ -41,8 +41,9 @@ export default defineType({
         defineField({
           name: "text",
           title: "Szöveg",
-          type: "string",
-          description: 'Pl.: "Ingyenes szállítás 30 000 Ft felett"',
+          type: "text",
+          rows: 3,
+          description: 'Pl.: "Ingyenes szállítás 30 000 Ft felett" – több sor is megadható',
         }),
         defineField({
           name: "link",

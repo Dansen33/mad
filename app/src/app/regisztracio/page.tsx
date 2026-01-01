@@ -55,7 +55,7 @@ export default function RegisztracioPage() {
         <div className="text-center">
           <h1 className="text-2xl font-extrabold">Regisztráció</h1>
           <p className="text-sm text-muted-foreground">
-            Hozz létre fiókot email és jelszóval, vagy használj Google / Apple bejelentkezést.
+            Hozz létre fiókot email és jelszóval.
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5 shadow-lg shadow-black/20">
@@ -103,25 +103,6 @@ export default function RegisztracioPage() {
               {status === "loading" ? "Feldolgozás..." : "Regisztráció"}
             </button>
           </form>
-          <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            vagy
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <div className="grid gap-2">
-            <Link
-              href="/api/auth/signin/google"
-              className="w-full rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:border-primary/60"
-            >
-              Folytatás Google-lel
-            </Link>
-            <Link
-              href="/api/auth/signin/apple"
-              className="w-full rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:border-primary/60"
-            >
-              Folytatás Apple-lel
-            </Link>
-          </div>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Van már fiókod?{" "}
             <Link href="/bejelentkezes" className="font-semibold text-primary hover:underline">

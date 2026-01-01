@@ -529,11 +529,11 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="w-full lg:hidden">
-            <details className="rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+            <details className="relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
               <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
                 Szűrők <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
               </summary>
-              <div className="mt-3 border-t border-border pt-3">
+              <div className="relative z-10 mt-3 border-t border-border pt-3">
                 <FilterForm key={filterKey} {...filterProps} />
               </div>
             </details>

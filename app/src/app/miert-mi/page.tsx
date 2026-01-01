@@ -66,9 +66,9 @@ export default function MiertMiPage() {
       <ProductHeader />
 
       <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-16 pt-10">
-        <section className="space-y-4 rounded-3xl border border-border bg-secondary/30 p-8 shadow-xl shadow-slate-900/40">
-          <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Miért a WELLCOMP?</p>
-          <h1 className="text-4xl font-bold leading-tight text-foreground">
+        <section className="space-y-4 rounded-3xl border border-border bg-gradient-to-br from-primary/20 via-[#5de7bd]/15 to-card p-8 shadow-2xl shadow-black/30">
+          <p className="text-sm uppercase tracking-[0.3em] text-primary/80">Miért a WELLCOMP?</p>
+          <h1 className="text-4xl font-extrabold leading-tight text-foreground">
             Biztonságos pénz, biztonságos döntés
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -82,7 +82,7 @@ export default function MiertMiPage() {
           {highlights.map((item) => (
             <article
               key={item.title}
-              className="flex h-full flex-col justify-between rounded-2xl border border-border bg-muted p-6 shadow-lg shadow-slate-900/40 transition hover:border-foreground/60"
+              className="flex h-full flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-lg shadow-black/25 transition hover:-translate-y-1 hover:border-primary/60"
             >
               <div className="space-y-3">
                 <h2 className="text-xl font-semibold text-foreground">{item.title}</h2>
@@ -92,7 +92,7 @@ export default function MiertMiPage() {
                 <ul className="mt-4 space-y-1 text-xs text-muted-foreground">
                   {item.bullets.map((bullet) => (
                     <li key={bullet} className="flex items-start gap-2">
-                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-foreground" />
+                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                       <span>{bullet}</span>
                     </li>
                   ))}
@@ -102,14 +102,14 @@ export default function MiertMiPage() {
           ))}
         </section>
 
-        <section className="space-y-5 rounded-3xl border border-border bg-gradient-to-br from-slate-950/80 to-slate-900/70 p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.55)]">
-          <p className="text-3xl font-semibold text-white">Válaszd a minőséget</p>
-          <p className="text-base text-white">
+        <section className="space-y-5 rounded-3xl border border-border bg-gradient-to-br from-primary to-[#5de7bd] p-8 text-center shadow-2xl shadow-primary/40">
+          <p className="text-3xl font-semibold text-[#0c0f14]">Válaszd a minőséget</p>
+          <p className="text-base text-[#0c0f14]/80">
             Ha olyan helyről szeretnél vásárolni, ahol a minőség, megbízhatóság és garancia nem csak ígéret, hanem alap, akkor a WELLCOMP a jó választás.
           </p>
           <Link
             href="/"
-            className="mx-auto inline-flex items-center justify-center rounded-full border border-transparent bg-foreground px-8 py-3 text-base font-semibold text-background transition hover:bg-primary/80"
+            className="mx-auto inline-flex items-center justify-center rounded-full bg-[#0c0f14] px-8 py-3 text-base font-semibold text-white shadow-lg shadow-black/30 transition hover:brightness-90"
           >
             Vásárlás
           </Link>

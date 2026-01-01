@@ -9,11 +9,15 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-5 shadow-sm backdrop-blur">
           <div className="flex items-start gap-3">
             <Link href={"/"}>
-            <img className="-ml-6 -mr-10 h-20 w-60" src="/logo.png" alt="WELLCOMP" />
+              <img
+                className="h-16 w-[170px] shrink-0 object-contain sm:h-20 sm:w-[230px] sm:-ml-4 sm:-mr-10"
+                src="/logo.png"
+                alt="WELLCOMP"
+              />
             </Link>
             <div>
               <div className="text-xs uppercase tracking-wide text-primary">WELLCOMP</div>
-              <div className="text-xl font-extrabold">Segítünk választani</div>
+              <div className="text-xl font-extrabold my-1">Segítünk választani</div>
               <p className="text-sm text-muted-foreground">
                 Profi tanácsadás és ügyfélszolgálat vásárlás előtt és után is.
               </p>
@@ -32,7 +36,7 @@ export function SiteFooter() {
               className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-primary/30 shadow-lg"
             >
               <Image src="/mail.svg" alt="E-mail" width={16} height={16} />
-              Kapcsolat űrlap
+              Kapcsolat
             </Link>
           </div>
         </div>
@@ -113,7 +117,7 @@ export function SiteFooter() {
                 +36 70 317 6680
               </a>
               <Link className="hover:text-foreground" href="/kapcsolat#contact-form">
-                Kapcsolat űrlap
+                Kapcsolat
               </Link>
               <p className="text-foreground">H-P: 8:00 - 17:00</p>
             </div>

@@ -295,7 +295,7 @@ export const productBySlugQuery = groq`
 `;
 
 export const catalogItemBySlugQuery = groq`
-*[_type in ["product","pc","phone"] && slug.current==$slug][0]{
+*[_type in ["product","pc","phone","console"] && slug.current==$slug][0]{
   _id,
   _type,
   name,

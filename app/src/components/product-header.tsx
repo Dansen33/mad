@@ -4,17 +4,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LiveSearch } from "./live-search";
+import { useCartStore } from "@/store/cart-store";
 
 export function ProductHeader() {
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartTotal, setCartTotal] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState<{ enabled?: boolean; text?: string; link?: string } | null>(null);
   const [pcHoverCat, setPcHoverCat] = useState<string | null>(null);
   const [laptopHoverCat, setLaptopHoverCat] = useState<string | null>(null);
   const [phoneHoverBrand, setPhoneHoverBrand] = useState<string | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<"pc" | "laptop" | "phone" | null>(null);
+  const [consoleHoverCat, setConsoleHoverCat] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"pc" | "laptop" | "phone" | "console" | null>(null);
+  const cartTotal = useCartStore((state) => state.totalHuf);
+  const initCart = useCartStore((state) => state.init);
   const pcCategories = [
+    { label: "Összes PC", slug: "" },
     { label: "Belépő kategóriás Gamer PC 300.000 Ft-ig", slug: "gamer-pc-olcso-300-alatt" },
     { label: "Középkategóriás Gamer PC 300.000-600.000 Ft-ig", slug: "gamer-pc-300-600" },
     { label: "Felsőkategóriás Gamer PC 600.000 Ft-tól", slug: "gamer-pc-600-felett" },
@@ -22,13 +26,42 @@ export function ProductHeader() {
     { label: "Felújított Gamer PC", slug: "felujitott-gamer-pc" },
   ];
   const laptopCategories = [
+    { label: "Összes laptop", slug: "osszes" },
     { label: "Általános felhasználás", slug: "GENERAL" },
     { label: "Üzleti laptopok", slug: "BUSINESS" },
     { label: "Gamer laptopok", slug: "GAMING" },
     { label: "Workstation laptopok", slug: "WORKSTATION" },
     { label: "Érintőképernyős", slug: "TOUCH" },
   ];
-  const phoneBrands = ["Apple", "Samsung", "Xiaomi", "Pixel"];
+  const phoneBrands = ["Összes telefon", "Apple", "Samsung", "Xiaomi", "Pixel"];
+  const consoleCategories = [
+    { label: "Összes konzol", slug: "", options: [] },
+    {
+      label: "Playstation",
+      slug: "playstation",
+      options: [
+        { label: "Playstation 4", slug: "playstation-4" },
+        { label: "Playstation 5", slug: "playstation-5" },
+      ],
+    },
+    {
+      label: "Xbox",
+      slug: "xbox",
+      options: [
+        { label: "Series S", slug: "series-s" },
+        { label: "Series Y", slug: "series-y" },
+      ],
+    },
+    {
+      label: "Nintendo",
+      slug: "nintendo",
+      options: [
+        { label: "Switch", slug: "switch" },
+        { label: "Switch 2", slug: "switch-2" },
+      ],
+    },
+    { label: "Kézikonzolok", slug: "kezikonzolok", options: [] },
+  ];
 
   const handleNavNavigate = () => {
     setMenuOpen(false);
@@ -36,6 +69,7 @@ export function ProductHeader() {
     setLaptopHoverCat(null);
     setPhoneHoverBrand(null);
     setPcHoverCat(null);
+    setConsoleHoverCat(null);
   };
 
   useEffect(() => {
@@ -45,6 +79,7 @@ export function ProductHeader() {
       setLaptopHoverCat(null);
       setPhoneHoverBrand(null);
       setPcHoverCat(null);
+      setConsoleHoverCat(null);
     }
   }, [menuOpen]);
 
@@ -63,6 +98,10 @@ export function ProductHeader() {
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
+      if (menuOpen) {
+        setHidden(false);
+        return;
+      }
       const y = window.scrollY;
       if (y > lastY && y > 50) setHidden(true);
       else if (y < lastY) setHidden(false);
@@ -70,70 +109,12 @@ export function ProductHeader() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [menuOpen]);
 
-  // Kosár total frissítés
+  // Kosár total frissítés (globális store)
   useEffect(() => {
-    let ignore = false;
-    const readStoredTotal = () => {
-      if (typeof window === "undefined") return null;
-      const fromStorage = window.localStorage.getItem("cart-total-huf");
-      if (fromStorage !== null) {
-        const parsed = Number(fromStorage);
-        if (Number.isFinite(parsed)) return parsed;
-      }
-      const cookie = document.cookie
-        .split(";")
-        .map((c) => c.trim())
-        .find((c) => c.startsWith("cart-total-huf="));
-      if (cookie) {
-        const value = cookie.split("=")[1];
-        const parsed = Number(value);
-        if (Number.isFinite(parsed)) return parsed;
-      }
-      return null;
-    };
-    const persistTotal = (total: number) => {
-      setCartTotal(total);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("cart-total-huf", String(total));
-        document.cookie = `cart-total-huf=${total}; path=/; max-age=604800; SameSite=Lax`;
-      }
-    };
-    const loadCart = async () => {
-      try {
-        const res = await fetch("/api/cart", { cache: "no-cache", credentials: "include" });
-        if (!res.ok) return;
-        const data = await res.json();
-        const total =
-          typeof data.totalHuf === "number" && Number.isFinite(data.totalHuf)
-            ? data.totalHuf
-            : null;
-        if (!ignore && total !== null) persistTotal(total);
-      } catch {
-        /* ignore */
-      }
-    };
-    const stored = readStoredTotal();
-    if (stored !== null) {
-      setTimeout(() => setCartTotal(stored), 0);
-    }
-    loadCart();
-    const handler = (event: Event) => {
-      const custom = event as CustomEvent<{ totalHuf?: number; items?: unknown[] }>;
-      const total = custom?.detail?.totalHuf;
-      if (typeof total === "number" && Number.isFinite(total)) {
-        persistTotal(total);
-        return;
-      }
-      loadCart();
-    };
-    window.addEventListener("cart-updated", handler as EventListener);
-    return () => {
-      ignore = true;
-      window.removeEventListener("cart-updated", handler as EventListener);
-    };
-  }, []);
+    initCart();
+  }, [initCart]);
 
   useEffect(() => {
     let ignore = false;
@@ -162,11 +143,11 @@ export function ProductHeader() {
       {announcement?.enabled !== false && announcement?.text ? (
         <div className="flex items-center justify-center bg-gradient-to-r from-primary to-[#5de7bd] px-3 py-2 text-center text-xs font-semibold text-[#0c0f14] sm:text-sm">
           {announcement.link ? (
-            <Link href={announcement.link} className="hover:underline">
+            <Link href={announcement.link} className="whitespace-pre-line hover:underline">
               {announcement.text}
             </Link>
           ) : (
-            <span>{announcement.text}</span>
+            <span className="whitespace-pre-line">{announcement.text}</span>
           )}
         </div>
       ) : null}
@@ -227,8 +208,8 @@ export function ProductHeader() {
             >
               {menuOpen ? "✕" : "☰"}
             </button>
-          </div>
-        </div>
+                </div>
+              </div>
 
         {/* Nav */}
         <nav
@@ -251,109 +232,6 @@ export function ProductHeader() {
             >
               Akciók
             </Link>
-            <div
-              className={`group relative block w-full md:inline-block md:w-auto ${
-                openDropdown && openDropdown !== "laptop" ? "hidden md:inline-block" : ""
-              }`}
-            >
-              <Link
-                className="text-foreground"
-                href="/laptopok/osszes"
-                onClick={(e) => {
-                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                  if (isDesktop) return;
-                  e.preventDefault();
-                  setOpenDropdown((curr) => (curr === "laptop" ? null : "laptop"));
-                }}
-              >
-                <span className="inline-flex items-center gap-1">
-                  Laptop
-                  <img
-                    src="/dropdown.svg"
-                    alt=""
-                    className={`inline-block h-6 w-6 transition-transform duration-200 ${
-                      openDropdown === "laptop" ? "rotate-180" : ""
-                    }`}
-                  />
-                </span>
-              </Link>
-              <div
-                className={`${
-                  openDropdown === "laptop"
-                    ? "grid visible opacity-100 translate-y-0"
-                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
-                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
-                onMouseLeave={() => setLaptopHoverCat(null)}
-                style={{ zIndex: 5 }}
-              >
-                <div className="space-y-2">
-                  <div className="text-xs uppercase text-muted-foreground">Felhasználási módok</div>
-                  {laptopCategories.map((item) => {
-                    const activeSlug = laptopHoverCat;
-                    const isActive = activeSlug === item.slug;
-                    const href = `/kategoria/osszes?category=${item.slug}`;
-                    return (
-                      <Link
-                        key={item.label}
-                        href={href}
-                        onMouseEnter={() => setLaptopHoverCat(item.slug)}
-                        onFocus={() => setLaptopHoverCat(item.slug)}
-                        onClick={(event) => {
-                          const isDesktop =
-                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                          if (isDesktop) return;
-                          event.preventDefault();
-                          setLaptopHoverCat(item.slug);
-                          setOpenDropdown("laptop");
-                        }}
-                        className={`block rounded-full border px-3 py-2 text-foreground transition hover:border-primary/60 ${
-                          isActive ? "border-primary/70 bg-secondary" : "border-border bg-secondary"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-                {laptopHoverCat && (
-                  <div className="space-y-2">
-                    <div className="text-xs uppercase text-muted-foreground">Állapot</div>
-                    {(() => {
-                      const activeSlug = laptopHoverCat;
-                      const baseHref = `/kategoria/osszes?category=${activeSlug}`;
-                      const withCondition = (condition: "UJ" | "FELUJITOTT") =>
-                        `${baseHref}${baseHref.includes("?") ? "&" : "?"}condition=${condition}`;
-                      return (
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                          <Link
-                            href={withCondition("UJ")}
-                            onClick={() => {
-                              const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                              if (!isDesktop) handleNavNavigate();
-                            }}
-                            className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
-                          >
-                            Új
-                          </Link>
-                          <Link
-                            href={withCondition("FELUJITOTT")}
-                            onClick={() => {
-                              const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                              if (!isDesktop) handleNavNavigate();
-                            }}
-                            className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
-                          >
-                            Felújított
-                          </Link>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            </div>
             <div
               className={`group relative block w-full md:inline-block md:w-auto ${
                 openDropdown && openDropdown !== "pc" ? "hidden md:inline-block" : ""
@@ -394,7 +272,8 @@ export function ProductHeader() {
                   {pcCategories.map((item) => {
                     const activeSlug = pcHoverCat;
                     const isActive = activeSlug === item.slug;
-                    const href = `/pc-k/osszes?category=${item.slug}`;
+                    const href = item.slug ? `/pc-k/osszes?category=${item.slug}` : "/pc-k/osszes";
+                    const isAll = item.slug === "";
                     return (
                       <Link
                         key={item.label}
@@ -404,7 +283,7 @@ export function ProductHeader() {
                         onClick={(event) => {
                           const isDesktop =
                             typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                          if (isDesktop) return;
+                          if (isDesktop || isAll) return;
                           event.preventDefault();
                           setPcHoverCat(item.slug);
                           setOpenDropdown("pc");
@@ -459,6 +338,209 @@ export function ProductHeader() {
             </div>
             <div
               className={`group relative block w-full md:inline-block md:w-auto ${
+                openDropdown && openDropdown !== "laptop" ? "hidden md:inline-block" : ""
+              }`}
+            >
+              <Link
+                className="text-foreground"
+                href="/laptopok/osszes"
+                onClick={(e) => {
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  if (isDesktop) return;
+                  e.preventDefault();
+                  setOpenDropdown((curr) => (curr === "laptop" ? null : "laptop"));
+                }}
+              >
+                <span className="inline-flex items-center gap-1">
+                  Laptop
+                  <img
+                    src="/dropdown.svg"
+                    alt=""
+                    className={`inline-block h-6 w-6 transition-transform duration-200 ${
+                      openDropdown === "laptop" ? "rotate-180" : ""
+                    }`}
+                  />
+                </span>
+              </Link>
+              <div
+                className={`${
+                  openDropdown === "laptop"
+                    ? "grid visible opacity-100 translate-y-0"
+                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
+                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                onMouseLeave={() => setLaptopHoverCat(null)}
+                style={{ zIndex: 5 }}
+              >
+                <div className="space-y-2">
+                  <div className="text-xs uppercase text-muted-foreground">Felhasználási módok</div>
+                  {laptopCategories.map((item) => {
+                    const activeSlug = laptopHoverCat;
+                    const isActive = activeSlug === item.slug;
+                    const href =
+                      item.slug === "osszes" ? "/kategoria/osszes" : `/kategoria/osszes?category=${item.slug}`;
+                    const isAll = item.slug === "osszes";
+                    return (
+                      <Link
+                        key={item.label}
+                        href={href}
+                        onMouseEnter={() => setLaptopHoverCat(item.slug)}
+                        onFocus={() => setLaptopHoverCat(item.slug)}
+                        onClick={(event) => {
+                          const isDesktop =
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                          if (isDesktop || isAll) return;
+                          event.preventDefault();
+                          setLaptopHoverCat(item.slug);
+                          setOpenDropdown("laptop");
+                        }}
+                        className={`block rounded-full border px-3 py-2 text-foreground transition hover:border-primary/60 ${
+                          isActive ? "border-primary/70 bg-secondary" : "border-border bg-secondary"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+                {laptopHoverCat && laptopHoverCat !== "osszes" && (
+                  <div className="space-y-2">
+                    <div className="text-xs uppercase text-muted-foreground">Állapot</div>
+                    {(() => {
+                      const activeSlug = laptopHoverCat;
+                      const baseHref = `/kategoria/osszes?category=${activeSlug}`;
+                      const withCondition = (condition: "UJ" | "FELUJITOTT") =>
+                        `${baseHref}${baseHref.includes("?") ? "&" : "?"}condition=${condition}`;
+                      return (
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          <Link
+                            href={withCondition("UJ")}
+                            onClick={() => {
+                              const isDesktop =
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                              if (!isDesktop) handleNavNavigate();
+                            }}
+                            className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
+                          >
+                            Új
+                          </Link>
+                          <Link
+                            href={withCondition("FELUJITOTT")}
+                            onClick={() => {
+                              const isDesktop =
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                              if (!isDesktop) handleNavNavigate();
+                            }}
+                            className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
+                          >
+                            Felújított
+                          </Link>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div
+              className={`group relative block w-full md:inline-block md:w-auto ${
+                openDropdown && openDropdown !== "console" ? "hidden md:inline-block" : ""
+              }`}
+            >
+              <Link
+                className="text-foreground"
+                href="/konzolok/osszes"
+                onClick={(e) => {
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  if (isDesktop) return;
+                  e.preventDefault();
+                  setOpenDropdown((curr) => (curr === "console" ? null : "console"));
+                }}
+              >
+                <span className="inline-flex items-center gap-1">
+                  Konzolok
+                  <img
+                    src="/dropdown.svg"
+                    alt=""
+                    className={`inline-block h-6 w-6 transition-transform duration-200 ${
+                      openDropdown === "console" ? "rotate-180" : ""
+                    }`}
+                  />
+                </span>
+              </Link>
+              <div
+                className={`${
+                  openDropdown === "console"
+                    ? "grid visible opacity-100 translate-y-0"
+                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
+                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(720px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                onMouseLeave={() => setConsoleHoverCat(null)}
+                style={{ zIndex: 5 }}
+              >
+                <div className="space-y-2">
+                  <div className="text-xs uppercase text-muted-foreground">Márkák</div>
+                  {consoleCategories.map((item) => {
+                    const activeSlug = consoleHoverCat;
+                    const isActive = activeSlug === item.slug;
+                    const href = item.slug ? `/konzolok/osszes?category=${item.slug}` : "/konzolok/osszes";
+                    const isAll = !item.slug;
+                    return (
+                      <Link
+                        key={item.label}
+                        href={href}
+                        onMouseEnter={() => setConsoleHoverCat(item.slug)}
+                        onFocus={() => setConsoleHoverCat(item.slug)}
+                        onClick={(event) => {
+                          const isDesktop =
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                          if (isDesktop || isAll) return;
+                          event.preventDefault();
+                          setConsoleHoverCat(item.slug);
+                          setOpenDropdown("console");
+                        }}
+                        className={`block rounded-full border px-3 py-2 text-foreground transition hover:border-primary/60 ${
+                          isActive ? "border-primary/70 bg-secondary" : "border-border bg-secondary"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+                {consoleHoverCat &&
+                  consoleCategories.find((cat) => cat.slug === consoleHoverCat)?.options?.length ? (
+                  <div className="space-y-2">
+                    <div className="text-xs uppercase text-muted-foreground">Modellek</div>
+                    {(() => {
+                      const activeCategory = consoleCategories.find((cat) => cat.slug === consoleHoverCat);
+                      if (!activeCategory) return null;
+                      const baseHref = `/konzolok/osszes?category=${activeCategory.slug}`;
+                      const withModel = (modelSlug: string) =>
+                        `${baseHref}${baseHref.includes("?") ? "&" : "?"}model=${modelSlug}`;
+                      return (
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          {activeCategory.options.map((option) => (
+                            <Link
+                              key={option.label}
+                              href={withModel(option.slug)}
+                              onClick={() => {
+                                const isDesktop =
+                                  typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                if (!isDesktop) handleNavNavigate();
+                              }}
+                              className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
+                            >
+                              {option.label}
+                            </Link>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            <div
+              className={`group relative block w-full md:inline-block md:w-auto ${
                 openDropdown && openDropdown !== "phone" ? "hidden md:inline-block" : ""
               }`}
             >
@@ -498,6 +580,7 @@ export function ProductHeader() {
                     const activeBrand = phoneHoverBrand;
                     const isActive = activeBrand === item;
                     const href = `/telefonok/osszes?brand=${encodeURIComponent(item)}`;
+                    const isAll = item === "Összes telefon";
                     return (
                       <Link
                         key={item}
@@ -507,7 +590,7 @@ export function ProductHeader() {
                         onClick={(event) => {
                           const isDesktop =
                             typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-                          if (isDesktop) return;
+                          if (isDesktop || isAll) return;
                           event.preventDefault();
                           setPhoneHoverBrand(item);
                           setOpenDropdown("phone");
@@ -521,7 +604,7 @@ export function ProductHeader() {
                     );
                   })}
                 </div>
-                {phoneHoverBrand && (
+                {phoneHoverBrand && phoneHoverBrand !== "Összes telefon" && (
                   <div className="space-y-2">
                     <div className="text-xs uppercase text-muted-foreground">Állapot</div>
                     {(() => {
@@ -609,20 +692,20 @@ export function ProductHeader() {
               Profil
             </Link>
             <Link
-              href="tel:+36703176680"
+              href="/kapcsolat"
               className="whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30"
             >
-              +36 70 317 6680
+              Kapcsolat
             </Link>
           </div>
 
           <Link
-            href="tel:+36703176680"
+            href="/kapcsolat"
             className={`flex items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 md:hidden ${
               openDropdown ? "hidden" : ""
             }`}
           >
-            +36 70 317 6680
+            Kapcsolat
           </Link>
         </nav>
       </div>

@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type CartItem = {
   slug: string;
   name: string;
   brand: string;
+  _type?: "product" | "pc" | "phone" | "console";
   image?: string | null;
   quantity: number;
   priceHuf: number;
@@ -21,6 +22,19 @@ type Props = {
 export function CartClient({ initialItems }: Props) {
   const [items, setItems] = useState<CartItem[]>(initialItems);
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const res = await fetch("/api/cart", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        setItems(data.items);
+      } catch {
+        /* ignore */
+      }
+    };
+    refresh();
+  }, []);
 
   const upgradeSum = (item: CartItem) => (item.upgrades ?? []).reduce((s, u) => s + u.deltaHuf, 0);
   const lineTotal = useCallback((item: CartItem) => (item.priceHuf + upgradeSum(item)) * item.quantity, []);
@@ -92,7 +106,15 @@ export function CartClient({ initialItems }: Props) {
             className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30 md:flex-row md:items-center"
           >
             <Link
-              href={`/termek/${item.slug}`}
+              href={
+                item._type === "pc"
+                  ? `/pc-k/${item.slug}`
+                  : item._type === "phone"
+                    ? `/telefonok/${item.slug}`
+                    : item._type === "console"
+                      ? `/konzolok/${item.slug}`
+                      : `/termek/${item.slug}`
+              }
               className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-secondary"
             >
               <Image
@@ -109,7 +131,15 @@ export function CartClient({ initialItems }: Props) {
             </Link>
             <div className="flex flex-1 flex-col gap-2">
                 <Link
-                  href={`/termek/${item.slug}`}
+                  href={
+                    item._type === "pc"
+                      ? `/pc-k/${item.slug}`
+                      : item._type === "phone"
+                        ? `/telefonok/${item.slug}`
+                        : item._type === "console"
+                          ? `/konzolok/${item.slug}`
+                          : `/termek/${item.slug}`
+                  }
                   className="text-base font-semibold hover:text-primary"
                 >
                   {item.name}

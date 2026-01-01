@@ -46,6 +46,22 @@ export function CheckoutForm({ items, subtotal }: Props) {
     address: "",
   });
   const [prefillKey, setPrefillKey] = useState(0);
+  const performZipLookup = async (zip: string, form: HTMLFormElement | null, cityFieldName: string) => {
+    const cleaned = zip.replace(/[^0-9]/g, "").trim();
+    if (!cleaned || cleaned.length < 4) return;
+    try {
+      const res = await fetch(`/api/zip-lookup?q=${encodeURIComponent(cleaned)}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("lookup");
+      const data = await res.json();
+      const city = data?.city;
+      if (city) {
+        const cityInput = form?.elements.namedItem(cityFieldName) as HTMLInputElement | null;
+        if (cityInput) cityInput.value = city;
+      }
+    } catch {
+      /* noop */
+    }
+  };
 
   useEffect(() => {
     const loadSession = async () => {
@@ -305,6 +321,9 @@ export function CheckoutForm({ items, subtotal }: Props) {
               className="rounded-xl border border-border bg-secondary px-3 py-2 text-sm focus:outline-none"
               placeholder="Telefon"
               type="tel"
+              pattern="^(?:\\+36|06|36)[\\s-]?(?:\\d{1}[\\s-]?\\d{3}[\\s-]?\\d{4}|\\d{2}[\\s-]?\\d{3}[\\s-]?\\d{4})$"
+              title="Magyar számot adj meg: pl. +36 30 123 4567 vagy 06 1 234 5678"
+              inputMode="tel"
               defaultValue={prefill.phone}
             />
           </div>
@@ -336,6 +355,10 @@ export function CheckoutForm({ items, subtotal }: Props) {
               className="rounded-xl border border-border bg-secondary px-3 py-2 text-sm focus:outline-none"
               placeholder="Irányítószám"
               defaultValue={prefill.zip}
+              pattern="[0-9]{4}"
+              maxLength={4}
+              inputMode="numeric"
+              onBlur={(e) => performZipLookup(e.currentTarget.value, e.currentTarget.form, "city")}
             />
             <input
               name="city"
@@ -397,6 +420,10 @@ export function CheckoutForm({ items, subtotal }: Props) {
                 className="rounded-xl border border-border bg-secondary px-3 py-2 text-sm focus:outline-none"
                 placeholder="Irányítószám"
                 required
+                pattern="[0-9]{4}"
+                maxLength={4}
+                inputMode="numeric"
+                onBlur={(e) => performZipLookup(e.currentTarget.value, e.currentTarget.form, "billingCity")}
               />
               <input
                 name="billingCity"
@@ -433,7 +460,10 @@ export function CheckoutForm({ items, subtotal }: Props) {
                     checked={selectedShipping === opt.id}
                     onChange={() => setSelectedShipping(opt.id)}
                   />
-                  <span className="font-semibold text-foreground">{opt.label}</span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {opt.note && <span className="text-[11px] text-muted-foreground">{opt.note}</span>}
+                  </div>
                 </div>
                 <span className="text-muted-foreground">
                   {Number.isFinite(opt.priceHuf)
@@ -453,7 +483,6 @@ export function CheckoutForm({ items, subtotal }: Props) {
             {[
               { id: "card", label: "Bankkártya", note: "Barion biztonságos fizetés" },
               { id: "wire", label: "Átutalás", note: "Díjbekérő alapján" },
-              { id: "cod", label: "Utánvét", note: "Készpénz/bankkártya futárnál" },
             ].map((opt, idx) => (
               <label
                 key={opt.id}

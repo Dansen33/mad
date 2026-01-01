@@ -98,9 +98,7 @@ export async function POST(req: Request) {
     const paymentMethodMapped =
       paymentMethod === "wire"
         ? "Átutalás"
-        : paymentMethod === "cod"
-          ? "Utánvét"
-          : "Bankkártya";
+        : "Bankkártya";
 
     const docBody: {
       _type: "order";

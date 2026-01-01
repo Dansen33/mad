@@ -11,6 +11,7 @@ type CartItem = {
   slug: string;
   name: string;
   brand: string;
+  _type?: "product" | "pc" | "phone" | "console";
   priceHuf: number;
   quantity: number;
   image?: string | null;
@@ -18,6 +19,7 @@ type CartItem = {
 };
 
 type CatalogItem = {
+  _type?: "product" | "pc" | "phone" | "console";
   priceHuf?: number;
   finalPriceHuf?: number;
   invalidDiscount?: boolean;
@@ -95,6 +97,7 @@ async function refreshCartItems(items: CartItem[]) {
       name: product.name,
       brand: product.brand ?? "",
       image: product.images?.[0]?.url,
+      _type: product._type as CartItem["_type"],
       priceHuf: priceForCart,
     });
   }
@@ -149,12 +152,14 @@ export async function POST(request: Request) {
     items[idx].priceHuf = priceForCart;
     items[idx].name = product.name;
     items[idx].brand = product.brand ?? "";
+    items[idx]._type = product._type as CartItem["_type"];
     items[idx].image = product.images?.[0]?.url;
   } else {
     items.push({
       slug,
       name: product.name,
       brand: product.brand ?? "",
+      _type: product._type as CartItem["_type"],
       priceHuf: priceForCart,
       quantity,
       image: product.images?.[0]?.url,

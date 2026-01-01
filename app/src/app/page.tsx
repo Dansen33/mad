@@ -149,6 +149,7 @@ export default function Home() {
   const [featuredMainImage, setFeaturedMainImage] = useState<string | null>(null);
   const [showAllSpecs, setShowAllSpecs] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [heroPaused, setHeroPaused] = useState(false);
   const [popularCats, setPopularCats] = useState<{ title: string; href: string; image: string }[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
   const featuredCarouselRef = useRef<HTMLDivElement | null>(null);
@@ -291,13 +292,13 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!heroSlides.length) return;
+    if (!heroSlides.length || heroPaused) return;
     const slidesCount = heroSlides.length;
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slidesCount);
     }, 5000);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroSlides.length, heroPaused]);
 
   useEffect(() => {
     if (featured?.images?.[0]?.url) {
@@ -404,6 +405,7 @@ export default function Home() {
     const t = (item._type || "").toLowerCase();
     if (t === "pc") return `/pc-k/${item.slug}`;
     if (t === "phone") return `/telefonok/${item.slug}`;
+    if (t === "console") return `/konzolok/${item.slug}`;
     return `/termek/${item.slug}`;
   };
 
@@ -416,26 +418,28 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-stretch">
             <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-transparent to-transparent p-8 shadow-2xl shadow-black/40">
               <div className="inline-block rounded-full bg-primary/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-                Gondosan válogatott
+                WELCOME TO WELLCOMP
               </div>
-              <h1 className="mt-3 text-3xl font-extrabold leading-tight text-foreground md:text-4xl">
+              <h1 className="mt-3 mb-3 text-3xl font-extrabold leading-tight text-foreground md:text-4xl">
                 Tökéletességre törekszünk:
               </h1>
-              <h2 className="mt-1 text-2xl font-bold leading-tight text-foreground md:text-3xl"> minden termékünkön több mint 30 tesztet végzünk el átadás előtt!</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Minden gépet diagnosztikával, garanciával és prémium
-                csomagolással adunk át. Vállalkozásoknak és magánszemélyeknek
-                egyaránt.
+              <h2 className="mt-1 text-2xl my-5 font-bold leading-tight text-foreground md:text-3xl"> minden termékünket alaposan átvizsgáljuk átadás előtt!</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground ">
+                Vásárolj nálunk magabiztosan, hiszen minden eszközünk szigorú minőségellenőrzésen megy keresztül, hogy garantáljuk a megbízhatóságot és a kiváló teljesítményt,
+                azért hogy a legjobb élményt nyújthassuk.
               </p>
-              <div className="mt-4 -mx-4 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-start">
                 {[
-                  "24-48 órás szállítás",
-                  "2 év limitált garancia felújított termékekre",
+                  "Gyors szállítás",
+                  "Akár 2 év garancia felújított termékekre",
                   "Kiváló minőségű termékek",
+                  "Szakértői ügyfélszolgálat",
+                  "Többpontos ellenőrzés",
+                  "Valós igényekre szabva",
                 ].map((pill) => (
                   <span
                     key={pill}
-                    className="rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold"
+                    className="w-full rounded-full border border-border bg-card px-3 py-2 text-center text-xs font-semibold sm:w-auto"
                   >
                     {pill}
                   </span>
@@ -463,7 +467,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40">
+            <div
+              className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40"
+              onMouseEnter={() => setHeroPaused(true)}
+              onMouseLeave={() => setHeroPaused(false)}
+            >
               {heroLoading ? (
                 <div className="flex flex-col gap-4 p-6">
                   <div className="aspect-[16/7] w-full rounded-xl bg-secondary" />
@@ -495,8 +503,8 @@ export default function Home() {
                               "https://dummyimage.com/900x600/0f1320/ffffff&text=wellcomp"
                             }
                             alt={slide.title}
-                            className="h-full w-full object-contain bg-white"
-                            sizes="(min-width: 1024px) 100vw, 100vw"
+                            className="h-full w-full object-cover"
+                            sizes="(min-width: 1024px) 70vw, 100vw"
                             priority
                             unoptimized
                           />
@@ -565,7 +573,7 @@ export default function Home() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-extrabold text-foreground">Legnépszerűbb kategóriáink</h2>
             <p className="text-sm text-muted-foreground">
-              Válogass a legkedveltebb gamer és üzleti gépek közül.
+              Fedezd fel a legnépszerűbb termékkategóriáinkat!
             </p>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

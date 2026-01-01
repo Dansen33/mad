@@ -33,7 +33,7 @@ export async function reduceStockForOrder(orderId: string) {
       slugs.map(async (slug) => {
         try {
           const prod = await sanityClient.fetch(
-            `*[_type in ["product","pc","phone"] && slug.current==$slug][0]{_id,stock}`,
+            `*[_type in ["product","pc","phone","console"] && slug.current==$slug][0]{_id,stock}`,
             { slug },
           );
           if (!prod?._id) return;

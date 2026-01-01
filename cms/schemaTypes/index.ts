@@ -12,11 +12,13 @@ import coupon from "./schemas/coupon";
 import popularCategory from "./schemas/popularCategory";
 import discount from "./schemas/discount";
 import testimonial from "./schemas/testimonial";
+import consoleProduct from "./schemas/console";
 
 export const schemaTypes = [
   product,
   pc,
   phone,
+  consoleProduct,
   blogPost,
   heroSlide,
   siteSettings,

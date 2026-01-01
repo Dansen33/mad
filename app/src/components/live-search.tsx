@@ -13,7 +13,7 @@ type Result = {
   invalidDiscount?: boolean;
   discounts?: { type?: string; amount?: number }[];
   brand: string;
-  type: "product" | "pc" | "phone";
+  type: "product" | "pc" | "phone" | "console";
   image?: string | null;
 };
 
@@ -56,7 +56,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
           invalidDiscount?: boolean;
           discounts?: { type?: string; amount?: number }[];
           brand: string;
-          _type: "product" | "pc" | "phone";
+          _type: "product" | "pc" | "phone" | "console";
           image?: { url?: string | null };
         };
         const parsed: Result[] = (data as CmsHit[]).map((item) => ({
@@ -170,7 +170,9 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
                       ? `/pc-k/${item.slug}`
                       : item.type === "phone"
                         ? `/telefonok/${item.slug}`
-                        : `/termek/${item.slug}`;
+                        : item.type === "console"
+                          ? `/konzolok/${item.slug}`
+                          : `/termek/${item.slug}`;
                   const { final, compareAt, hasDiscount } = computePrice(item);
                   return (
                     <Link
@@ -263,7 +265,9 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
                             ? `/pc-k/${item.slug}`
                             : item.type === "phone"
                               ? `/telefonok/${item.slug}`
-                              : `/termek/${item.slug}`;
+                              : item.type === "console"
+                                ? `/konzolok/${item.slug}`
+                                : `/termek/${item.slug}`;
                         const { final, compareAt, hasDiscount } = computePrice(item);
                         return (
                           <Link

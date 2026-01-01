@@ -10,6 +10,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/blog",
     "/laptopok/osszes",
+    "/pc-k/osszes",
+    "/telefonok/osszes",
+    "/konzolok/osszes",
     "/miert-mi",
     "/rolunk",
     "/kapcsolat",
@@ -33,6 +36,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "updated": coalesce(_updatedAt,_createdAt)
     }`)) || [];
 
+  const pcs =
+    (await sanityClient.fetch<
+      { slug: string; updated?: string }[]
+    >(groq`*[_type=="pc" && (!defined(stock) || stock > 0)]{
+      "slug": slug.current,
+      "updated": coalesce(_updatedAt,_createdAt)
+    }`)) || [];
+
+  const phones =
+    (await sanityClient.fetch<
+      { slug: string; updated?: string }[]
+    >(groq`*[_type=="phone" && (!defined(stock) || stock > 0)]{
+      "slug": slug.current,
+      "updated": coalesce(_updatedAt,_createdAt)
+    }`)) || [];
+
+  const consoles =
+    (await sanityClient.fetch<
+      { slug: string; updated?: string }[]
+    >(groq`*[_type=="console" && (!defined(stock) || stock > 0)]{
+      "slug": slug.current,
+      "updated": coalesce(_updatedAt,_createdAt)
+    }`)) || [];
+
   const blogs =
     (await sanityClient.fetch<
       { slug: string; updated?: string }[]
@@ -48,6 +75,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: p.updated ? new Date(p.updated) : now,
     }));
 
+  const pcEntries = pcs
+    .filter((p) => p.slug)
+    .map((p) => ({
+      url: `${site}/pc-k/${p.slug}`,
+      lastModified: p.updated ? new Date(p.updated) : now,
+    }));
+
+  const phoneEntries = phones
+    .filter((p) => p.slug)
+    .map((p) => ({
+      url: `${site}/telefonok/${p.slug}`,
+      lastModified: p.updated ? new Date(p.updated) : now,
+    }));
+
+  const consoleEntries = consoles
+    .filter((p) => p.slug)
+    .map((p) => ({
+      url: `${site}/konzolok/${p.slug}`,
+      lastModified: p.updated ? new Date(p.updated) : now,
+    }));
+
   const blogEntries = blogs
     .filter((b) => b.slug)
     .map((b) => ({
@@ -55,5 +103,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: b.updated ? new Date(b.updated) : now,
     }));
 
-  return [...staticPaths, ...productEntries, ...blogEntries];
+  return [...staticPaths, ...productEntries, ...pcEntries, ...phoneEntries, ...consoleEntries, ...blogEntries];
 }
