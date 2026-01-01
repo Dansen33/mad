@@ -213,11 +213,11 @@ export function ProductHeader() {
 
         {/* Nav */}
         <nav
-          className={`relative w-full flex-col gap-4 text-sm font-semibold text-muted-foreground md:flex md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4 ${
+          className={`relative w-full flex-col gap-4 text-sm font-semibold text-muted-foreground md:flex md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3 ${
             menuOpen ? "flex rounded-2xl border border-border bg-card/95 p-4 shadow-lg shadow-black/25 backdrop-blur-sm" : "hidden md:flex"
           } md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0`}
         >
-          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-4">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-3">
             <Link
               className={`text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
               href="/"
@@ -673,10 +673,10 @@ export function ProductHeader() {
             </Link>
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             <Link
               href="/kosar"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 -ml-3 text-sm font-semibold"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 -ml-3 text-sm font-semibold"
             >
               <img src="/carticon.svg" alt="" className="h-4 w-4" />
               Kosár{" "}
@@ -686,7 +686,7 @@ export function ProductHeader() {
             </Link>
             <Link
               href="/profil"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold"
             >
               <img src="/usericon.svg" alt="" className="h-4 w-4" />
               Profil
