@@ -10,6 +10,7 @@ export function ProductHeader() {
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<{ enabled?: boolean; text?: string; link?: string } | null>(null);
+  const [announcementClosed, setAnnouncementClosed] = useState(false);
   const [pcHoverCat, setPcHoverCat] = useState<string | null>(null);
   const [laptopHoverCat, setLaptopHoverCat] = useState<string | null>(null);
   const [phoneHoverBrand, setPhoneHoverBrand] = useState<string | null>(null);
@@ -140,8 +141,8 @@ export function ProductHeader() {
         hidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      {announcement?.enabled !== false && announcement?.text ? (
-        <div className="flex items-center justify-center bg-gradient-to-r from-primary to-[#5de7bd] px-3 py-2 text-center text-xs font-semibold text-[#0c0f14] sm:text-sm">
+      {announcement?.enabled !== false && announcement?.text && !announcementClosed ? (
+        <div className="relative flex items-center justify-center bg-gradient-to-r from-primary to-[#5de7bd] px-4 pr-10 py-2 text-center text-[11px] font-semibold text-[#0c0f14] sm:px-3 sm:pr-10 sm:text-sm transition-all duration-300 ease-out">
           {announcement.link ? (
             <Link href={announcement.link} className="whitespace-pre-line hover:underline">
               {announcement.text}
@@ -149,6 +150,13 @@ export function ProductHeader() {
           ) : (
             <span className="whitespace-pre-line">{announcement.text}</span>
           )}
+          <button
+            aria-label="Bezár"
+            className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-sm font-bold text-[#0c0f14] hover:bg-white/80 sm:right-3"
+            onClick={() => setAnnouncementClosed(true)}
+          >
+            ×
+          </button>
         </div>
       ) : null}
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 py-4 sm:px-6">
