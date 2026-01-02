@@ -135,6 +135,32 @@ export function ProductHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const closed = window.localStorage.getItem("announcement-closed");
+    if (!closed) return;
+    const expiresAt = Number(closed);
+    if (!Number.isFinite(expiresAt)) {
+      window.localStorage.removeItem("announcement-closed");
+      return;
+    }
+    const shouldHide = expiresAt > Date.now();
+    if (shouldHide) {
+      // use a microtask to avoid sync setState lint warning
+      Promise.resolve().then(() => setAnnouncementClosed(true));
+    } else {
+      window.localStorage.removeItem("announcement-closed");
+    }
+  }, []);
+
+  const handleCloseAnnouncement = () => {
+    setAnnouncementClosed(true);
+    if (typeof window !== "undefined") {
+      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 óra
+      window.localStorage.setItem("announcement-closed", String(expiresAt));
+    }
+  };
+
   return (
     <header
       className={`sticky top-0 z-30 mb-4 border-b border-border bg-background/90 backdrop-blur transition-transform duration-300 ${
@@ -153,7 +179,7 @@ export function ProductHeader() {
           <button
             aria-label="Bezár"
             className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-sm font-bold text-[#0c0f14] hover:bg-white/80 sm:right-3"
-            onClick={() => setAnnouncementClosed(true)}
+            onClick={handleCloseAnnouncement}
           >
             ×
           </button>
