@@ -445,7 +445,7 @@ export default function Home() {
                   </span>
                 ))}
               </div>
-              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {[
                   { label: "Készlet", value: "100+ termék", sub: "Folyamatosan frissítve" },
                   { label: "Átlag értékelés", value: "4.9 / 5", sub: "Ügyfélelégedettség" },

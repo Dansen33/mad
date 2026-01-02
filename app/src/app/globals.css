@@ -141,6 +141,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   body.light {
     background: radial-gradient(120% 120% at 20% 20%, #ffffff 0%, #edf2fb 45%, #f5f7fb 100%);

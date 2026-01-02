@@ -127,7 +127,7 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} WELLCOMP. Minden jog fenntartva.</span>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-3 sm:flex">
               <Link href="mailto:info@wellcomp.hu" className="flex items-center gap-2 hover:text-foreground">
                 <Image src="/mail.svg" alt="E-mail" width={16} height={16} />
                 <span>info@wellcomp.hu</span>
@@ -136,8 +136,8 @@ export function SiteFooter() {
                 <Image src="/phone.svg" alt="Telefon" width={16} height={16} />
                 <span>+36 70 317 6680</span>
               </Link>
-              <img src="/barionbannersm.png" alt="Barion" className="h-18 w-auto" />
             </div>
+            <img src="/barionbannersm.png" alt="Barion" className="h-18 w-auto" />
           </div>
         </div>
       </div>

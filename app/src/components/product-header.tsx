@@ -187,10 +187,10 @@ export function ProductHeader() {
       ) : null}
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 py-4 sm:px-6">
         {/* Top row: logo + search + actions egy sorban */}
-          <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-nowrap md:items-center md:justify-between md:gap-4">
+          <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:flex-nowrap lg:items-center lg:justify-between lg:gap-4">
             <Link
               href="/"
-              className="flex items-center gap-3 font-extrabold tracking-tight md:hidden"
+              className="flex items-center gap-3 font-extrabold tracking-tight lg:hidden"
             >
               <img
               src="/logo.png"
@@ -201,7 +201,7 @@ export function ProductHeader() {
 
 <Link
   href="/"
-  className="hidden items-center md:flex pr-36 pb-3"
+  className="hidden items-center lg:flex pr-36 pb-3"
 >
   <span className="h-12 md:h-16 lg:h-20 w-auto max-w-[400px] object-contain">
     <img
@@ -212,11 +212,11 @@ export function ProductHeader() {
   </span>
 </Link>
 
-          <div className="hidden w-full md:block md:min-w-[320px] md:max-w-[720px] md:flex-1">
+          <div className="hidden w-full lg:block lg:min-w-[320px] lg:max-w-[720px] lg:flex-1">
             <LiveSearch mode="desktop" />
           </div>
 
-          <div className="flex w-full shrink-0 items-center justify-center gap-2 md:hidden">
+          <div className="flex w-full shrink-0 items-center justify-center gap-2 lg:hidden">
             <Link
               href="/kosar"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold"
@@ -236,7 +236,7 @@ export function ProductHeader() {
             </Link>
             <LiveSearch mode="mobile" />
             <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menü"
             >
@@ -247,35 +247,35 @@ export function ProductHeader() {
 
         {/* Nav */}
         <nav
-          className={`relative w-full flex-col gap-4 text-sm font-semibold text-muted-foreground md:flex md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3 ${
-            menuOpen ? "flex rounded-2xl border border-border bg-card/95 p-4 shadow-lg shadow-black/25 backdrop-blur-sm" : "hidden md:flex"
-          } md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0`}
+          className={`relative w-full flex-col gap-4 text-sm font-semibold text-muted-foreground lg:flex lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-3 ${
+            menuOpen ? "flex rounded-2xl border border-border bg-card/95 p-4 shadow-lg shadow-black/25 backdrop-blur-sm" : "hidden lg:flex"
+          } lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0`}
         >
-          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
             <Link
-              className={`text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
               href="/"
               onClick={handleNavNavigate}
             >
               Főoldal
             </Link>
             <Link
-              className={`text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
               href="/akciok"
               onClick={handleNavNavigate}
             >
               Akciók
             </Link>
             <div
-              className={`group relative block w-full md:inline-block md:w-auto ${
-                openDropdown && openDropdown !== "pc" ? "hidden md:inline-block" : ""
+              className={`group relative block w-full lg:inline-block lg:w-auto ${
+                openDropdown && openDropdown !== "pc" ? "hidden lg:inline-block" : ""
               }`}
             >
               <Link
                 className="text-foreground"
                 href="/pc-k/osszes"
                 onClick={(e) => {
-                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                   if (isDesktop) return;
                   e.preventDefault();
                   setOpenDropdown((curr) => (curr === "pc" ? null : "pc"));
@@ -296,8 +296,8 @@ export function ProductHeader() {
                 className={`${
                   openDropdown === "pc"
                     ? "grid visible opacity-100 translate-y-0"
-                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
-                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                    : "hidden lg:grid lg:invisible lg:opacity-0 lg:translate-y-1"
+                } lg:absolute right-0 left-auto lg:left-0 lg:right-auto lg:top-full lg:mt-2 mt-3 w-full lg:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:max-w-none lg:grid-cols-[1fr_0.85fr]`}
                 onMouseLeave={() => setPcHoverCat(null)}
                 style={{ zIndex: 5 }}
               >
@@ -316,7 +316,7 @@ export function ProductHeader() {
                         onFocus={() => setPcHoverCat(item.slug)}
                         onClick={(event) => {
                           const isDesktop =
-                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                           if (isDesktop || isAll) return;
                           event.preventDefault();
                           setPcHoverCat(item.slug);
@@ -345,7 +345,7 @@ export function ProductHeader() {
                             href={withCondition("UJ")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -356,7 +356,7 @@ export function ProductHeader() {
                             href={withCondition("FELUJITOTT")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -371,15 +371,15 @@ export function ProductHeader() {
               </div>
             </div>
             <div
-              className={`group relative block w-full md:inline-block md:w-auto ${
-                openDropdown && openDropdown !== "laptop" ? "hidden md:inline-block" : ""
+              className={`group relative block w-full lg:inline-block lg:w-auto ${
+                openDropdown && openDropdown !== "laptop" ? "hidden lg:inline-block" : ""
               }`}
             >
               <Link
                 className="text-foreground"
                 href="/laptopok/osszes"
                 onClick={(e) => {
-                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                   if (isDesktop) return;
                   e.preventDefault();
                   setOpenDropdown((curr) => (curr === "laptop" ? null : "laptop"));
@@ -400,8 +400,8 @@ export function ProductHeader() {
                 className={`${
                   openDropdown === "laptop"
                     ? "grid visible opacity-100 translate-y-0"
-                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
-                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                    : "hidden lg:grid lg:invisible lg:opacity-0 lg:translate-y-1"
+                } lg:absolute right-0 left-auto lg:left-0 lg:right-auto lg:top-full lg:mt-2 mt-3 w-full lg:w-[min(820px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:max-w-none lg:grid-cols-[1fr_0.85fr]`}
                 onMouseLeave={() => setLaptopHoverCat(null)}
                 style={{ zIndex: 5 }}
               >
@@ -421,7 +421,7 @@ export function ProductHeader() {
                         onFocus={() => setLaptopHoverCat(item.slug)}
                         onClick={(event) => {
                           const isDesktop =
-                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                           if (isDesktop || isAll) return;
                           event.preventDefault();
                           setLaptopHoverCat(item.slug);
@@ -450,7 +450,7 @@ export function ProductHeader() {
                             href={withCondition("UJ")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -461,7 +461,7 @@ export function ProductHeader() {
                             href={withCondition("FELUJITOTT")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -476,15 +476,15 @@ export function ProductHeader() {
               </div>
             </div>
             <div
-              className={`group relative block w-full md:inline-block md:w-auto ${
-                openDropdown && openDropdown !== "console" ? "hidden md:inline-block" : ""
+              className={`group relative block w-full lg:inline-block lg:w-auto ${
+                openDropdown && openDropdown !== "console" ? "hidden lg:inline-block" : ""
               }`}
             >
               <Link
                 className="text-foreground"
                 href="/konzolok/osszes"
                 onClick={(e) => {
-                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                   if (isDesktop) return;
                   e.preventDefault();
                   setOpenDropdown((curr) => (curr === "console" ? null : "console"));
@@ -505,8 +505,8 @@ export function ProductHeader() {
                 className={`${
                   openDropdown === "console"
                     ? "grid visible opacity-100 translate-y-0"
-                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
-                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(720px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                    : "hidden lg:grid lg:invisible lg:opacity-0 lg:translate-y-1"
+                } lg:absolute right-0 left-auto lg:left-0 lg:right-auto lg:top-full lg:mt-2 mt-3 w-full lg:w-[min(720px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:max-w-none lg:grid-cols-[1fr_0.85fr]`}
                 onMouseLeave={() => setConsoleHoverCat(null)}
                 style={{ zIndex: 5 }}
               >
@@ -525,7 +525,7 @@ export function ProductHeader() {
                         onFocus={() => setConsoleHoverCat(item.slug)}
                         onClick={(event) => {
                           const isDesktop =
-                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                           if (isDesktop || isAll) return;
                           event.preventDefault();
                           setConsoleHoverCat(item.slug);
@@ -558,7 +558,7 @@ export function ProductHeader() {
                               href={withModel(option.slug)}
                               onClick={() => {
                                 const isDesktop =
-                                  typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                  typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                                 if (!isDesktop) handleNavNavigate();
                               }}
                               className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -574,15 +574,15 @@ export function ProductHeader() {
               </div>
             </div>
             <div
-              className={`group relative block w-full md:inline-block md:w-auto ${
-                openDropdown && openDropdown !== "phone" ? "hidden md:inline-block" : ""
+              className={`group relative block w-full lg:inline-block lg:w-auto ${
+                openDropdown && openDropdown !== "phone" ? "hidden lg:inline-block" : ""
               }`}
             >
               <Link
                 className="text-foreground"
                 href="/telefonok/osszes"
                 onClick={(e) => {
-                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                  const isDesktop = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                   if (isDesktop) return;
                   e.preventDefault();
                   setOpenDropdown((curr) => (curr === "phone" ? null : "phone"));
@@ -603,8 +603,8 @@ export function ProductHeader() {
                 className={`${
                   openDropdown === "phone"
                     ? "grid visible opacity-100 translate-y-0"
-                    : "hidden md:grid md:invisible md:opacity-0 md:translate-y-1"
-                } md:absolute right-0 left-auto md:left-0 md:right-auto md:top-full md:mt-2 mt-3 w-full md:w-[min(680px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:max-w-none md:grid-cols-[1fr_0.85fr]`}
+                    : "hidden lg:grid lg:invisible lg:opacity-0 lg:translate-y-1"
+                } lg:absolute right-0 left-auto lg:left-0 lg:right-auto lg:top-full lg:mt-2 mt-3 w-full lg:w-[min(680px,calc(100vw-64px))] max-w-[calc(100vw-20px)] grid-cols-1 gap-3 rounded-2xl border border-border bg-card/95 p-4 text-sm shadow-lg shadow-black/25 backdrop-blur-sm transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:max-w-none lg:grid-cols-[1fr_0.85fr]`}
                 onMouseLeave={() => setPhoneHoverBrand(null)}
                 style={{ zIndex: 5 }}
               >
@@ -623,7 +623,7 @@ export function ProductHeader() {
                         onFocus={() => setPhoneHoverBrand(item)}
                         onClick={(event) => {
                           const isDesktop =
-                            typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                            typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                           if (isDesktop || isAll) return;
                           event.preventDefault();
                           setPhoneHoverBrand(item);
@@ -652,7 +652,7 @@ export function ProductHeader() {
                             href={withCondition("UJ")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -663,7 +663,7 @@ export function ProductHeader() {
                             href={withCondition("FELUJITOTT")}
                             onClick={() => {
                               const isDesktop =
-                                typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+                                typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
                               if (!isDesktop) handleNavNavigate();
                             }}
                             className="flex items-center justify-center rounded-full border border-border bg-secondary px-3 py-2 text-foreground hover:border-primary/60"
@@ -680,34 +680,34 @@ export function ProductHeader() {
             <Link
               href="/miert-mi"
               onClick={handleNavNavigate}
-              className={`hover:text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`hover:text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
             >
               Miért mi?
             </Link>
             <Link
               href="/rolunk"
               onClick={handleNavNavigate}
-              className={`hover:text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`hover:text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
             >
               Rólunk
             </Link>
             <Link
               href="/blog"
               onClick={handleNavNavigate}
-              className={`hover:text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`hover:text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
             >
               Blog
             </Link>
             <Link
               href="/kapcsolat"
               onClick={handleNavNavigate}
-              className={`hover:text-foreground ${openDropdown ? "hidden md:inline-block" : ""}`}
+              className={`hover:text-foreground ${openDropdown ? "hidden lg:inline-block" : ""}`}
             >
               Kapcsolat
             </Link>
           </div>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             <Link
               href="/kosar"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 -ml-3 text-sm font-semibold"
@@ -732,15 +732,6 @@ export function ProductHeader() {
               Kapcsolat
             </Link>
           </div>
-
-          <Link
-            href="/kapcsolat"
-            className={`flex items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-[#5de7bd] px-4 py-2 text-sm font-bold text-[#0c0f14] shadow-lg shadow-primary/30 md:hidden ${
-              openDropdown ? "hidden" : ""
-            }`}
-          >
-            Kapcsolat
-          </Link>
         </nav>
       </div>
     </header>
