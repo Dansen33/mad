@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -45,9 +44,9 @@ export function FilterSelect({ name, label, options, defaultValue = "" }: Props)
         <Image
           src="/dropdown.svg"
           alt=""
-          width={16}
-          height={16}
-          className={`h-4 w-4 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          width={20}
+          height={20}
+          className={`h-5 w-5 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (

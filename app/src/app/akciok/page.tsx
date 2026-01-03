@@ -261,9 +261,16 @@ export default async function AkciokPage({ searchParams }: { searchParams?: Prom
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="w-full lg:hidden">
-            <details className="relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
-                Szűrők <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
+            <details className="group relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                Szűrők
+                <Image
+                  src="/dropdown.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                />
               </summary>
               <div className="relative z-10 mt-3 border-t border-border pt-3">
                 <FilterForm

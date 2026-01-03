@@ -19,9 +19,10 @@ type Result = {
 
 type LiveSearchProps = {
   mode?: "all" | "desktop" | "mobile";
+  mobileVariant?: "button" | "bar";
 };
 
-export function LiveSearch({ mode = "all" }: LiveSearchProps) {
+export function LiveSearch({ mode = "all", mobileVariant = "button" }: LiveSearchProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
@@ -42,7 +43,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
     const t = setTimeout(async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/cms/search?q=${encodeURIComponent(query)}&limit=6`, {
+        const res = await fetch(`/api/cms/search?q=${encodeURIComponent(query)}&limit=50`, {
           signal: controller.signal,
         });
         if (!res.ok) return;
@@ -107,6 +108,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
 
   const showDesktop = mode !== "mobile";
   const showMobile = mode !== "desktop";
+  const isMobileBar = showMobile && mobileVariant === "bar";
 
   const computePrice = (item: Result) => {
     const base = typeof item.priceHuf === "number" ? item.priceHuf : 0;
@@ -143,7 +145,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
       {showDesktop && (
         <div
           ref={containerRef}
-          className="relative hidden min-w-[260px] max-w-full flex-1 items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg shadow-black/30 md:flex"
+          className="relative hidden min-w-[260px] max-w-full flex-1 items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg shadow-black/30 lg:flex"
         >
           <Image src="/searchicon.svg" alt="" width={16} height={16} className="shrink-0" />
           <input
@@ -156,7 +158,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
             placeholder={placeholder}
           />
           {(loading || results.length > 0) && open && (
-            <div className="absolute left-0 top-full z-30 mt-2 w-full rounded-2xl border border-border bg-popover p-2 shadow-xl shadow-black/40">
+            <div className="absolute left-0 top-full z-30 mt-2 w-full max-h-[320px] overflow-auto rounded-2xl border border-border bg-popover p-2 shadow-xl shadow-black/40 md:max-h-[380px] lg:max-h-[420px]">
               {loading && (
                 <div className="px-3 py-2 text-xs text-muted-foreground">Keresés...</div>
               )}
@@ -217,11 +219,92 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
         </div>
       )}
 
+      {/* Mobile search bar (inline) */}
+      {isMobileBar && (
+        <div
+          ref={containerRef}
+          className="relative flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-lg shadow-black/30 lg:hidden"
+        >
+          <Image src="/searchicon.svg" alt="" width={16} height={16} className="shrink-0" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => {
+              if (query.length >= 2) setOpen(true);
+            }}
+            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none"
+            placeholder={placeholder}
+          />
+          {(loading || results.length > 0) && open && (
+            <div className="absolute left-0 top-full z-30 mt-2 w-full max-h-[320px] overflow-auto rounded-2xl border border-border bg-popover p-2 shadow-xl shadow-black/40 sm:max-h-[360px]">
+              {loading && (
+                <div className="px-3 py-2 text-xs text-muted-foreground">Keresés...</div>
+              )}
+              {!loading && results.length === 0 && (
+                <div className="px-3 py-2 text-xs text-muted-foreground">Nincs találat</div>
+              )}
+              {!loading &&
+                results.map((item) => {
+                  const href =
+                    item.type === "pc"
+                      ? `/pc-k/${item.slug}`
+                      : item.type === "phone"
+                        ? `/telefonok/${item.slug}`
+                        : item.type === "console"
+                          ? `/konzolok/${item.slug}`
+                          : `/termek/${item.slug}`;
+                  const { final, compareAt, hasDiscount } = computePrice(item);
+                  return (
+                    <Link
+                      key={`${item.type}-${item.slug}`}
+                      href={href}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-card"
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-border bg-secondary">
+                        <Image
+                          src={
+                            item.image ||
+                            "https://dummyimage.com/200x150/0f1320/ffffff&text=WELLCOMP"
+                          }
+                          alt={item.name}
+                          width={40}
+                          height={40}
+                          className="object-contain"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="flex flex-1 flex-col">
+                        <span className="line-clamp-1 font-semibold text-foreground">
+                          {item.name}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">{item.brand}</span>
+                        <div className="flex flex-col text-[12px] leading-tight">
+                          {hasDiscount && (
+                            <span className="text-muted-foreground line-through">
+                              {new Intl.NumberFormat("hu-HU").format(compareAt!)} Ft
+                            </span>
+                          )}
+                          <span className={hasDiscount ? "text-primary font-semibold" : "text-foreground"}>
+                            {new Intl.NumberFormat("hu-HU").format(final)} Ft
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Mobile search icon + overlay */}
-      {showMobile && (
+      {showMobile && !isMobileBar && (
         <>
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg lg:hidden"
             aria-label="Keresés"
             onClick={() => {
               setMobileOpen(true);
@@ -232,7 +315,7 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
           </button>
 
           {mobileOpen && (
-            <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => { setMobileOpen(false); setOpen(false); }}>
+            <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => { setMobileOpen(false); setOpen(false); }}>
               <div
                 className="absolute left-1/2 top-4 w-[min(560px,calc(100vw-24px))] -translate-x-1/2 rounded-2xl border border-border bg-card p-3 shadow-2xl shadow-black/40 animate-slide-down"
                 onClick={(e) => e.stopPropagation()}
@@ -246,12 +329,19 @@ export function LiveSearch({ mode = "all" }: LiveSearchProps) {
                     onFocus={() => {
                       if (query.length >= 2) setOpen(true);
                     }}
+                    onBlur={() => {
+                      // Close quickly when leaving the field on mobile/tablet
+                      setTimeout(() => {
+                        setOpen(false);
+                        setMobileOpen(false);
+                      }, 80);
+                    }}
                     className="w-full bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none"
                     placeholder={placeholder}
                   />
                 </div>
                 {(loading || results.length > 0) && open && (
-                  <div className="mt-2 max-h-[60vh] overflow-auto rounded-2xl border border-border bg-popover p-2 shadow-xl shadow-black/40">
+                  <div className="mt-2 max-h-[280px] overflow-auto rounded-2xl border border-border bg-popover p-2 shadow-xl shadow-black/40 sm:max-h-[320px]">
                     {loading && (
                       <div className="px-3 py-2 text-xs text-muted-foreground">Keresés...</div>
                     )}

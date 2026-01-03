@@ -53,9 +53,6 @@ export function SiteFooter() {
               <Link className="hover:text-foreground" href="/pc-k/osszes">
                 PC
               </Link>
-              <Link className="hover:text-foreground" href="/pc-k/kategoria/gamer-pc-300-600">
-                Gamer PC
-              </Link>
               <Link className="hover:text-foreground" href="/pc-k/kategoria/professzionalis-munkaallomas">
                 Munkaállomások
               </Link>

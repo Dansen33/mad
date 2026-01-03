@@ -187,62 +187,63 @@ export function ProductHeader() {
       ) : null}
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 py-4 sm:px-6">
         {/* Top row: logo + search + actions egy sorban */}
-          <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:flex-nowrap lg:items-center lg:justify-between lg:gap-4">
+            <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:flex-nowrap lg:items-center lg:justify-between lg:gap-4">
+            {/* Mobile/Tablet top row */}
+            <div className="flex w-full items-center gap-2 px-2 lg:hidden">
+              <button
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="Menü"
+              >
+                {menuOpen ? "✕" : "☰"}
+              </button>
+              <Link
+                href="/"
+                className="flex items-center gap-2 font-extrabold tracking-tight"
+              >
+                <img src="/logo.png" alt="WELLCOMP" className="h-[60px] w-auto sm:h-[52px]" />
+              </Link>
+              <div className="flex flex-1 min-w-0 items-center gap-2">
+                <div className="hidden w-full md:flex">
+                  <LiveSearch mode="mobile" mobileVariant="bar" />
+                </div>
+                <div className="flex w-full justify-center md:hidden">
+                  <LiveSearch mode="mobile" />
+                </div>
+              </div>
+              <Link
+                href="/profil"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-3 text-sm font-semibold"
+              >
+                <img src="/usericon.svg" alt="" className="h-4 w-4" />
+                Profil
+              </Link>
+              <Link
+                href="/kosar"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-3 text-sm font-semibold"
+              >
+                <img src="/carticon.svg" alt="" className="h-4 w-4" />
+                Kosár
+              </Link>
+            </div>
+
+            {/* Desktop row */}
             <Link
               href="/"
-              className="flex items-center gap-3 font-extrabold tracking-tight lg:hidden"
+              className="hidden items-center lg:flex pr-36 pb-3"
             >
-              <img
-              src="/logo.png"
-              alt="WELLCOMP"
-              className="h-12 w-auto sm:h-14"
-            />
-          </Link>
-
-<Link
-  href="/"
-  className="hidden items-center lg:flex pr-36 pb-3"
->
-  <span className="h-12 md:h-16 lg:h-20 w-auto max-w-[400px] object-contain">
-    <img
-      src="/logo.png"
-      alt="WELLCOMP"
-      className="h-28 w-80 -ml-19 object-contain"
-    />
-  </span>
-</Link>
-
-          <div className="hidden w-full lg:block lg:min-w-[320px] lg:max-w-[720px] lg:flex-1">
-            <LiveSearch mode="desktop" />
-          </div>
-
-          <div className="flex w-full shrink-0 items-center justify-center gap-2 lg:hidden">
-            <Link
-              href="/kosar"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold"
-            >
-              <img src="/carticon.svg" alt="" className="h-4 w-4" />
-              Kosár{" "}
-              <span className="text-muted">
-                {cartTotal === null ? "…" : `${new Intl.NumberFormat("hu-HU").format(cartTotal)} Ft`}
+              <span className="h-12 md:h-16 lg:h-20 w-auto max-w-[400px] object-contain">
+                <img
+                  src="/logo.png"
+                  alt="WELLCOMP"
+                  className="h-28 w-80 -ml-19 object-contain"
+                />
               </span>
             </Link>
-            <Link
-              href="/profil"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold"
-            >
-              <img src="/usericon.svg" alt="" className="h-4 w-4" />
-              Profil
-            </Link>
-            <LiveSearch mode="mobile" />
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-lg lg:hidden"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Menü"
-            >
-              {menuOpen ? "✕" : "☰"}
-            </button>
-                </div>
+
+            <div className="hidden w-full lg:block lg:min-w-[320px] lg:max-w-[720px] lg:flex-1">
+              <LiveSearch mode="desktop" />
+            </div>
               </div>
 
         {/* Nav */}

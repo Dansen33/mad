@@ -104,7 +104,7 @@ function FilterForm({
         <input
           name="q"
           defaultValue={q}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
           placeholder="Keresés név/spec alapján"
         />
       </div>
@@ -124,7 +124,7 @@ function FilterForm({
         <select
           name="brand"
           defaultValue={brand || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {brands.map((v) => (
@@ -139,7 +139,7 @@ function FilterForm({
         <select
           name="soc"
           defaultValue={soc || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {socs.map((v) => (
@@ -154,7 +154,7 @@ function FilterForm({
         <select
           name="memory"
           defaultValue={memory || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {memories.map((v) => (
@@ -169,7 +169,7 @@ function FilterForm({
         <select
           name="storage"
           defaultValue={storage || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {storages.map((v) => (
@@ -184,7 +184,7 @@ function FilterForm({
         <select
           name="display"
           defaultValue={display || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {displays.map((v) => (
@@ -199,7 +199,7 @@ function FilterForm({
         <select
           name="os"
           defaultValue={os || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {oss.map((v) => (
@@ -529,9 +529,16 @@ export default async function PhoneOsszes({ searchParams }: { searchParams: Sear
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="w-full lg:hidden">
-            <details className="relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
-                Szűrők <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
+            <details className="group relative overflow-visible rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                Szűrők
+                <Image
+                  src="/dropdown.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="h-7 w-7 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                />
               </summary>
               <div className="relative z-10 mt-3 border-t border-border pt-3">
                 <FilterForm key={filterKey} {...filterProps} />

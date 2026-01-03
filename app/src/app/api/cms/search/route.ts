@@ -50,7 +50,7 @@ const searchQuery = `
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const limit = Number(searchParams.get("limit") ?? 6);
+  const limit = Number(searchParams.get("limit") ?? 50);
   const qRaw = (searchParams.get("q") ?? "").trim();
   const q = qRaw ? `${qRaw}*` : "";
   const qNoSpace = qRaw ? `${qRaw.replace(/\s+/g, "")}*` : "";
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     const rawItems = await sanityClient.fetch(searchQuery, {
       q,
       qNoSpace,
-      limit: Number.isFinite(limit) && limit > 0 ? limit : 6,
+      limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 100) : 50,
     });
     const items = (rawItems as { priceHuf?: number; discounts?: { type?: string; amount?: number }[]; invalidDiscount?: boolean; compareAtHuf?: number }[]).map((item) => {
       const base = typeof item.priceHuf === "number" ? item.priceHuf : 0;

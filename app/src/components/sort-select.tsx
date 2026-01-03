@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -83,9 +82,9 @@ export function SortSelect({ sort, params, id = "sort-select", options = DEFAULT
           <Image
             src="/dropdown.svg"
             alt=""
-            width={25}
-            height={25}
-            className={`size-[29px] shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+            width={20}
+            height={20}
+            className={`h-5 w-5 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
           />
         </button>
         {open && (

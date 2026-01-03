@@ -104,7 +104,7 @@ export function FilterForm({
           name="type"
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           <option value="product">Laptopok</option>
@@ -118,7 +118,7 @@ export function FilterForm({
         <select
           name="brand"
           defaultValue={brand || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {(currentFacet?.brands || []).map((b) => (
@@ -136,7 +136,7 @@ export function FilterForm({
               <select
                 name="soc"
                 defaultValue={soc || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.socs || []).map((v) => (
@@ -151,7 +151,7 @@ export function FilterForm({
               <select
                 name="memory"
                 defaultValue={memory || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.memories || []).map((v) => (
@@ -166,7 +166,7 @@ export function FilterForm({
               <select
                 name="storage"
                 defaultValue={storage || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.storages || []).map((v) => (
@@ -181,7 +181,7 @@ export function FilterForm({
               <select
                 name="display"
                 defaultValue={display || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.displays || []).map((v) => (
@@ -199,7 +199,7 @@ export function FilterForm({
               <select
                 name="cpu"
                 defaultValue={cpu || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.cpus || []).map((v) => (
@@ -214,7 +214,7 @@ export function FilterForm({
               <select
                 name="memory"
                 defaultValue={memory || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.memories || []).map((v) => (
@@ -229,7 +229,7 @@ export function FilterForm({
               <select
                 name="gpu"
                 defaultValue={gpu || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.gpus || []).map((v) => (
@@ -244,7 +244,7 @@ export function FilterForm({
               <select
                 name="storage"
                 defaultValue={storage || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.storages || []).map((v) => (
@@ -262,7 +262,7 @@ export function FilterForm({
               <select
                 name="cpu"
                 defaultValue={cpu || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.cpus || []).map((v) => (
@@ -277,7 +277,7 @@ export function FilterForm({
               <select
                 name="memory"
                 defaultValue={memory || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.memories || []).map((v) => (
@@ -292,7 +292,7 @@ export function FilterForm({
               <select
                 name="gpu"
                 defaultValue={gpu || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.gpus || []).map((v) => (
@@ -307,7 +307,7 @@ export function FilterForm({
               <select
                 name="storage"
                 defaultValue={storage || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.storages || []).map((v) => (
@@ -322,7 +322,7 @@ export function FilterForm({
               <select
                 name="display"
                 defaultValue={display || ""}
-                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+                className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
               >
                 <option value="">Összes</option>
                 {(currentFacet?.displays || []).map((v) => (

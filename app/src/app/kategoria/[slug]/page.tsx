@@ -91,7 +91,7 @@ function FilterForm({
         <input
           name="q"
           defaultValue={q}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
           placeholder="Keresés név/leírás"
         />
       </div>
@@ -101,7 +101,7 @@ function FilterForm({
         <select
           name="brand"
           defaultValue={brand || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {brands.map((b) => (
@@ -117,7 +117,7 @@ function FilterForm({
         <select
           name="cpu"
           defaultValue={cpu || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {cpus.map((v) => (
@@ -133,7 +133,7 @@ function FilterForm({
         <select
           name="memory"
           defaultValue={memory || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {memories.map((v) => (
@@ -151,7 +151,7 @@ function FilterForm({
         <select
           name="gpu"
           defaultValue={gpu || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {gpus.map((v) => (
@@ -167,7 +167,7 @@ function FilterForm({
         <select
           name="display"
           defaultValue={display || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {displays.map((v) => (
@@ -183,7 +183,7 @@ function FilterForm({
         <select
           name="storage"
           defaultValue={storage || ""}
-          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
+          className="select-icon w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm"
         >
           <option value="">Összes</option>
           {storages.map((v) => (
@@ -414,10 +414,16 @@ export default async function CategoryPage({
         <div className="grid items-start gap-6 md:grid-cols-[260px_1fr]">
           {/* Mobile dropdown */}
           <div className="w-full md:hidden">
-            <details className="rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
+            <details className="group rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/30">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
                 Szűrők
-                <span className="text-lg transition-transform duration-200 open:rotate-180">▼</span>
+                <Image
+                  src="/dropdown.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                />
               </summary>
               <div className="mt-3 border-t border-border pt-3">
                 <FilterForm key={filterKey} {...filterProps} />

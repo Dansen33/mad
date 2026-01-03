@@ -691,7 +691,7 @@ export function CheckoutForm({ items, subtotal }: Props) {
             alt="Barion"
             width={320}
             height={80}
-            className="h-20 w-auto"
+            className="h-auto w-48 sm:w-60 md:w-72 max-w-full"
             unoptimized
             priority
           />
