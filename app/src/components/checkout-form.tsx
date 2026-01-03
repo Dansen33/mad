@@ -164,6 +164,7 @@ export function CheckoutForm({ items, subtotal }: Props) {
     }
 
     const form = new FormData(e.currentTarget);
+    const paymentMethod = (form.get("payment") as string) || "card";
     const payload = {
       email: form.get("email"),
       phone: form.get("phone"),
@@ -176,7 +177,7 @@ export function CheckoutForm({ items, subtotal }: Props) {
       address: form.get("address"),
       note: form.get("note"),
       shippingMethod: form.get("shipping") || "standard",
-      paymentMethod: form.get("payment") || "card",
+      paymentMethod,
       items,
       subtotalHuf: subtotal,
       shippingHuf: items.length ? selectedShippingPrice : 0,
@@ -211,7 +212,7 @@ export function CheckoutForm({ items, subtotal }: Props) {
       const order = await res.json().catch(() => null);
 
       // 2) Barion (alap) vagy Stripe (fallback, ha Barion kikapcsolva)
-      const useBarion = process.env.NEXT_PUBLIC_USE_BARION !== "false";
+      const useBarion = process.env.NEXT_PUBLIC_USE_BARION !== "false" && paymentMethod === "card";
 
       if (useBarion) {
         const barionResp = await fetch("/api/payments/barion", {
@@ -255,7 +256,7 @@ export function CheckoutForm({ items, subtotal }: Props) {
         setStatus("error");
         setMessage("Barion válasz nem tartalmaz redirect URL-t.");
         return;
-      } else {
+      } else if (paymentMethod === "card") {
         const stripeResp = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -285,6 +286,16 @@ export function CheckoutForm({ items, subtotal }: Props) {
           window.location.href = stripeData.url;
           return;
         }
+      } else {
+        // Átutalás vagy Barion kikapcsolva: azonnali siker visszajelzés
+        setStatus("success");
+        setMessage("Rendelésed sikeresen beérkezett. Hamarosan küldjük a megadott e-mail címre átutalási adatokat.");
+        window.dispatchEvent(new CustomEvent("cart-updated", { detail: { totalHuf: 0, items: [] } }));
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("cart-total-huf", "0");
+          window.location.href = "/fizetes-siker?method=wire";
+        }
+        return;
       }
 
       setStatus("success");

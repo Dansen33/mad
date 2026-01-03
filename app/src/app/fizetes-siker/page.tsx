@@ -19,11 +19,14 @@ function FizetesSikerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const paymentId = searchParams?.get("paymentId") || "";
-  const [status, setStatus] = useState<"checking" | "ok" | "pending" | "failed">(
-    paymentId ? "checking" : "ok",
+  const method = searchParams?.get("method") || "";
+  const isWire = method === "wire";
+  const [status, setStatus] = useState<"checking" | "ok" | "pending" | "failed" | "wire">(
+    isWire ? "wire" : paymentId ? "checking" : "ok",
   );
 
   useEffect(() => {
+    if (isWire) return;
     let cancelled = false;
     let timeoutId: NodeJS.Timeout | null = null;
     let attempts = 0;
@@ -55,7 +58,7 @@ function FizetesSikerContent() {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [paymentId, router]);
+  }, [paymentId, router, isWire]);
 
   if (status === "checking") {
     return (
@@ -69,7 +72,7 @@ function FizetesSikerContent() {
     );
   }
 
-  const isFinalOk = status === "ok";
+  const isFinalOk = status === "ok" || status === "wire";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -77,10 +80,16 @@ function FizetesSikerContent() {
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-16 text-center">
         <div className="rounded-full bg-green-100 p-4 text-3xl">✅</div>
         <h1 className="text-3xl font-extrabold">
-          {isFinalOk ? "Sikeres fizetés" : "Fizetés folyamatban"}
+          {isWire
+            ? "Rendelésed sikeres"
+            : isFinalOk
+              ? "Sikeres fizetés"
+              : "Fizetés folyamatban"}
         </h1>
         <p className="text-muted-foreground">
-          {isFinalOk
+          {isWire
+            ? "Köszönjük a rendelésed! Hamarosan küldjük az átutalási adatokat és a visszaigazolást e-mailben."
+            : isFinalOk
             ? "Köszönjük a rendelésed! A visszaigazoló e-mailt és számlát hamarosan küldjük."
             : "A tranzakció visszaigazolása folyamatban van. Ha pár percen belül nem érkezik visszaigazolás, vedd fel velünk a kapcsolatot."}
         </p>
